@@ -22,6 +22,19 @@ namespace IA_MLP
         private double[] umbrales_c_salida;
         private double[] salidas_c_salida;
 
+        public event EventHandler<ErrorEpoca> InformarErrorEpoca;
+        public struct ErrorEpoca
+        {
+            public int Epoca { get; }
+            public double Error { get; }
+
+            public ErrorEpoca(int epoca, double error)
+            {
+                this.Epoca = epoca;
+                this.Error = error;
+            }
+        }
+
         private Random rnd;
 
         public Perceptron_e_o_s(int neuronas_capa_entrada, int neuronas_capa_oculta, int neuronas_capa_salida)
@@ -175,7 +188,7 @@ namespace IA_MLP
             for (int i = 0; i < neuronas_c_salida; ++i)  //agrego los umbrales a la sumatoria de entradas * pesos
                 salida_capa_salida[i] += umbrales_c_salida[i];
 
-            double[] softOut = Softmax(salida_capa_salida); //Aplico un afuncion diferente a la de la capa oculta, esto vimos que mejora los resultados
+            double[] softOut = Sigmoide(salida_capa_salida); //Aplico un afuncion diferente a la de la capa oculta, esto vimos que mejora los resultados
             Array.Copy(softOut, salidas_c_salida, softOut.Length);
 
             double[] retResult = new double[neuronas_c_salida];
@@ -183,25 +196,37 @@ namespace IA_MLP
             return retResult;
         }
 
+        /// <summary>
+        /// Funcion de transferencia lineal f(x) = x
+        /// </summary>
+        /// <param name="x"></param>
+        /// <returns></returns>
         private static double FuncionDeActivacion(double x)
         {
-            if (x < -20.0) return -1.0;
-            else if (x > 20.0) return 1.0;
-            else return Math.Tanh(x);
+            return x;
         }
 
-        private static double[] Softmax(double[] vector_salidas_capa_salida)
+        private static double DerivadaFuncionActivacion(double x)
         {
-            double sum = 0.0;
-            for (int i = 0; i < vector_salidas_capa_salida.Length; ++i)
-                sum += Math.Exp(vector_salidas_capa_salida[i]);
-
-            double[] result = new double[vector_salidas_capa_salida.Length];
-            for (int i = 0; i < vector_salidas_capa_salida.Length; ++i)
-                result[i] = Math.Exp(vector_salidas_capa_salida[i]) / sum;
-
-            return result; // now scaled so that xi sum to 1.0
+            return 1;
         }
+
+        private static double[] Sigmoide(double[] vector)
+        {
+            double[] result = new double[vector.Length];
+
+            for (int i = 0; i < vector.Length; ++i)
+                result[i] = 1.0 / (1.0 + Math.Exp(-vector[i]));
+
+            return result;
+        }
+
+        public static double Derivada_sigmoide(double x)
+        {
+            double y = 1.0 / (1.0 + Math.Exp(-x)); //calculo el sigmoide de cada valor
+            return y * (1 - y); //la derivada del sigmoide se calcula en funcion de si misma
+        }
+
 
         public double[] Entrenar(double[][] datos_entrenamiento, int corridas_maximas, double tasa_de_aprendizaje, double momento)
         {
@@ -228,10 +253,10 @@ namespace IA_MLP
             double derivada = 0.0;
             double signo_error = 0.0;
 
-            //establecimos una seuencia para poder correr los entrenamientos de manera aleatoria sobre los datos proporcionados
-            //int[] secuencia = new int[datos_entrenamiento.Length];
-            //for (int i = 0; i < secuencia.Length; ++i)
-            //    secuencia[i] = i;
+            //establecimos un vector con los indices para mezclarlos y poder correr los entrenamientos de manera aleatoria sobre los datos proporcionados
+            int[] secuencia = new int[datos_entrenamiento.Length];
+            for (int i = 0; i < secuencia.Length; ++i)
+                secuencia[i] = i;
 
             int errInterval = corridas_maximas / 10; //partimos las corridas maximas en 10 para ir comprobando el error
             while (corridas < corridas_maximas)
@@ -241,41 +266,47 @@ namespace IA_MLP
                 if (corridas % errInterval == 0 && corridas < corridas_maximas)
                 {
                     double error = Error(datos_entrenamiento);
-                    Console.WriteLine("Error en corrida = {0}, error = {1}", corridas, error);
+
+                    ErrorEpoca ee = new ErrorEpoca(corridas, error);
+                    InformarErrorEpoca?.Invoke(this, ee);
                 }
 
-                //Shuffle(secuencia); 
+                MezclarDatos(secuencia);
                 for (int ii = 0; ii < datos_entrenamiento.Length; ++ii)
                 {
-                    //int idx = sequence[ii];
-                    Array.Copy(datos_entrenamiento[ii], valores_entrada, neuronas_c_entrada);
+                    int idx = secuencia[ii];
+                    Array.Copy(datos_entrenamiento[idx], valores_entrada, neuronas_c_entrada);
                     Array.Copy(datos_entrenamiento[ii], neuronas_c_entrada, valores_esperados_salida, 0, neuronas_c_salida);
                     ProcesarEntradas(valores_entrada);
 
                     // indices: i = inputs, j = hiddens, k = outputs
 
-                    // 1. compute output node signals (assumes softmax)
+                    // 1. Obtener el signo del error en la salida
                     for (int k = 0; k < neuronas_c_salida; ++k)
                     {
-                        signo_error = valores_esperados_salida[k] - salidas_c_salida[k];  // Wikipedia uses (o-t)
-                        derivada = (1 - salidas_c_salida[k]) * salidas_c_salida[k]; // usando softmax
+                        signo_error = valores_esperados_salida[k] - salidas_c_salida[k];
+                        derivada = Derivada_sigmoide(salidas_c_salida[k]);
                         signo_gradiente_salida[k] = signo_error * derivada;
                     }
 
-                    // 2. compute hidden-to-output weight gradients using output signals
+                    // 2. Obtener los gradientes de los pesos de las conexiones capa oculta - capa salida utilizando
+                    //    los signos del gradiente a la salida
                     for (int j = 0; j < neuronas_c_oculta; ++j)
                         for (int k = 0; k < neuronas_c_salida; ++k)
                             gradientes_pesos_oculta_salida[j][k] = signo_gradiente_salida[k] * salidas_c_oculta[j];
 
-                    // 2b. compute output bias gradients using output signals
+                    // 2b. Obtener los gradientes de los umbrales de las neuronas de la capa salida utilizando
+                    //    los signos del gradiente a la salida
                     for (int k = 0; k < neuronas_c_salida; ++k)
                         gradientes_umbrales_salida[k] = signo_gradiente_salida[k] * 1.0;
 
-                    // 3. compute hidden node signals
+                    // 3. Obtener los signos de error de los nodos de la capa oculta
                     for (int j = 0; j < neuronas_c_oculta; ++j)
                     {
-                        derivada = (1 + salidas_c_oculta[j]) * (1 - salidas_c_oculta[j]); // usando tangente
-                        double sum = 0.0; // need sums of output signals times hidden-to-output weights
+                        derivada = DerivadaFuncionActivacion(salidas_c_oculta[j]); //<- 1 es porque la funcion de transferencia lineal derivada es 1;
+                        // por cada neurona de la capa oculta necesito obtener los pesos de las conexiones con la capa de salida
+                        // y multiplicarlos por el signo del error de la capa de salida
+                        double sum = 0.0;
                         for (int k = 0; k < neuronas_c_salida; ++k)
                         {
                             sum += signo_gradiente_salida[k] * pesos_c_oculta_a_c_salida[j][k];
@@ -283,18 +314,18 @@ namespace IA_MLP
                         signo_gradiente_capa_oculta[j] = derivada * sum;
                     }
 
-                    // 4. compute input-hidden weight gradients
+                    // 4. Obtener el valor del gradiente de los pesos entre la capa de ingreso y la oculta
                     for (int i = 0; i < neuronas_c_entrada; ++i)
                         for (int j = 0; j < neuronas_c_oculta; ++j)
                             gradientes_pesos_entrada_oculta[i][j] = signo_gradiente_capa_oculta[j] * entradas[i];
 
-                    // 4b. compute hidden node bias gradients
+                    // 4b. Obtener el gradiente de los umbrales de la capa oculta
                     for (int j = 0; j < neuronas_c_oculta; ++j)
                         gradientes_umbrales_oculta[j] = signo_gradiente_capa_oculta[j] * 1.0;
 
-                    // == update weights and biases
+                    // == Con estos valores actualizo los pesos y umbrales de las conexiones de la red ==
 
-                    // update input-to-hidden weights
+                    // Actualizo los pesos entre las conexiones de la capa de ingreso y la oculta
                     for (int i = 0; i < neuronas_c_entrada; ++i)
                     {
                         for (int j = 0; j < neuronas_c_oculta; ++j)
@@ -306,7 +337,7 @@ namespace IA_MLP
                         }
                     }
 
-                    // update hidden biases
+                    // Actualizo los umbrales de las neuronas de la capa oculta
                     for (int j = 0; j < neuronas_c_oculta; ++j)
                     {
                         double delta = gradientes_umbrales_oculta[j] * tasa_de_aprendizaje;
@@ -315,7 +346,7 @@ namespace IA_MLP
                         delta_valores_previos_umbrales_oculta[j] = delta;
                     }
 
-                    // update hidden-to-output weights
+                    // Actualizo los pesos de las conexiones entre la capa oculta y la de salida
                     for (int j = 0; j < neuronas_c_oculta; ++j)
                     {
                         for (int k = 0; k < neuronas_c_salida; ++k)
@@ -327,7 +358,7 @@ namespace IA_MLP
                         }
                     }
 
-                    // update output node biases
+                    // Actualizo los pesos de los umbrales de las neuronas de la capa de salida
                     for (int k = 0; k < neuronas_c_salida; ++k)
                     {
                         double delta = gradientes_umbrales_salida[k] * tasa_de_aprendizaje;
@@ -344,16 +375,16 @@ namespace IA_MLP
             return mejores_pesos_encontrados;
         } // fin de entrenamiento
 
-        //private void Shuffle(int[] sequence)
-        //{
-        //    for (int i = 0; i < sequence.Length; ++i)
-        //    {
-        //        int r = this.rnd.Next(i, sequence.Length);
-        //        int tmp = sequence[r];
-        //        sequence[r] = sequence[i];
-        //        sequence[i] = tmp;
-        //    }
-        //} 
+        private void MezclarDatos(int[] datos_entrenamiento)
+        {
+            for (int i = 0; i < datos_entrenamiento.Length; ++i)
+            {
+                int r = this.rnd.Next(i, datos_entrenamiento.Length);
+                int tmp = datos_entrenamiento[r];
+                datos_entrenamiento[r] = datos_entrenamiento[i];
+                datos_entrenamiento[i] = tmp;
+            }
+        }
 
         private double Error(double[][] datos_entrenamiento)
         {
@@ -364,8 +395,8 @@ namespace IA_MLP
             for (int i = 0; i < datos_entrenamiento.Length; ++i)
             {
                 Array.Copy(datos_entrenamiento[i], valores_entrada, neuronas_c_entrada);
-                Array.Copy(datos_entrenamiento[i], neuronas_c_entrada, valores_esperados, 0, neuronas_c_salida); // get target values
-                double[] yValues = this.ProcesarEntradas(valores_entrada); // outputs using current weights
+                Array.Copy(datos_entrenamiento[i], neuronas_c_entrada, valores_esperados, 0, neuronas_c_salida);
+                double[] yValues = this.ProcesarEntradas(valores_entrada);
                 for (int j = 0; j < neuronas_c_salida; ++j)
                 {
                     double err = valores_esperados[j] - yValues[j];
@@ -381,33 +412,48 @@ namespace IA_MLP
             int correctos = 0;
             int incorrectos = 0;
             double[] valores_entrada = new double[neuronas_c_entrada];
-            double[] valores_esperados_salida = new double[neuronas_c_salida];
+            double[] valores_esperados = new double[neuronas_c_salida];
             double[] valores_obtenidos;
 
             for (int i = 0; i < datos_de_prueba.Length; ++i)
             {
                 Array.Copy(datos_de_prueba[i], valores_entrada, neuronas_c_entrada);
-                Array.Copy(datos_de_prueba[i], neuronas_c_entrada, valores_esperados_salida, 0, neuronas_c_salida);
+                Array.Copy(datos_de_prueba[i], neuronas_c_entrada, valores_esperados, 0, neuronas_c_salida);
                 valores_obtenidos = this.ProcesarEntradas(valores_entrada);
 
-                bool correcto = true;
+                int indice1_resultado_esperado = Indice_del_valor_1(valores_esperados);
+                int indice1_resultado_obtenido = Indice_del_valor_1(valores_obtenidos);
 
-                for (int j = 0; j < neuronas_c_salida; j++)
-                {
-                    correcto = valores_esperados_salida[j] == FuncionRedondearValorSalidaABinario(valores_obtenidos[j]);
-                }
-
-                if (correcto)
+                if (indice1_resultado_esperado == indice1_resultado_obtenido)
                     ++correctos;
                 else
                     ++incorrectos;
+
             }
             return (correctos * 1.0) / (correctos + incorrectos);
         }
 
-        private double FuncionRedondearValorSalidaABinario(double valor)
+        private static int Indice_del_valor_1(double[] vector)
         {
-            return Math.Round(valor);
+            //tomo el vector de resultado obtenido y
+            //para compararlo con el vector de resultado esperado
+            //busco el maximo entre los resultados y a este indice le asigno el valor 1
+            //ya que los valores posibles de resultado son:
+            // 0 0 1 => b
+            // 0 1 0 => d
+            // 1 0 0 => f
+
+            int indice = 0;
+            double valor_maximo = vector[0];
+            for (int i = 0; i < vector.Length; ++i)
+            {
+                if (vector[i] > valor_maximo)
+                {
+                    valor_maximo = vector[i];
+                    indice = i;
+                }
+            }
+            return indice;
         }
 
     }
@@ -435,6 +481,19 @@ namespace IA_MLP
         private double[] salidas_c_salida;
 
         private Random rnd;
+
+        public event EventHandler<ErrorEpoca> InformarErrorEpoca;
+        public struct ErrorEpoca
+        {
+            public int Epoca { get; }
+            public double Error { get; }
+
+            public ErrorEpoca(int epoca, double error)
+            {
+                this.Epoca = epoca;
+                this.Error = error;
+            }
+        }
 
         public Perceptron_e_o_o_s(int neuronas_capa_entrada, int neuronas_capa_oculta_0, int neuronas_capa_oculta_1, int neuronas_capa_salida)
         {
@@ -635,7 +694,7 @@ namespace IA_MLP
             for (int i = 0; i < neuronas_c_salida; ++i)  //agrego los umbrales a la sumatoria de entradas * pesos
                 salida_capa_salida[i] += umbrales_c_salida[i];
 
-            double[] softOut = Softmax(salida_capa_salida); //Aplico un afuncion diferente a la de la capa oculta, esto vimos que mejora los resultados
+            double[] softOut = Sigmoide(salida_capa_salida); //Aplico un afuncion diferente a la de la capa oculta, esto vimos que mejora los resultados
             Array.Copy(softOut, salidas_c_salida, softOut.Length);
 
             double[] retResult = new double[neuronas_c_salida];
@@ -643,24 +702,35 @@ namespace IA_MLP
             return retResult;
         }
 
+        /// <summary>
+        /// Funcion de transferencia lineal f(x) = x
+        /// </summary>
+        /// <param name="x"></param>
+        /// <returns></returns>
         private static double FuncionDeActivacion(double x)
-        { //tangencial
-            if (x < -20.0) return -1.0;
-            else if (x > 20.0) return 1.0;
-            else return Math.Tanh(x);
+        {
+            return x;
         }
 
-        private static double[] Softmax(double[] vector_salidas_capa_salida)
+        private static double DerivadaFuncionActivacion(double x)
         {
-            double sum = 0.0;
-            for (int i = 0; i < vector_salidas_capa_salida.Length; ++i)
-                sum += Math.Exp(vector_salidas_capa_salida[i]);
+            return 1;
+        }
 
-            double[] result = new double[vector_salidas_capa_salida.Length];
-            for (int i = 0; i < vector_salidas_capa_salida.Length; ++i)
-                result[i] = Math.Exp(vector_salidas_capa_salida[i]) / sum;
+        private static double[] Sigmoide(double[] vector)
+        {
+            double[] result = new double[vector.Length];
 
-            return result; // now scaled so that xi sum to 1.0
+            for (int i = 0; i < vector.Length; ++i)
+                result[i] = 1.0 / (1.0 + Math.Exp(-vector[i]));
+
+            return result;
+        }
+
+        public static double Derivada_sigmoide(double x)
+        {
+            double y = 1.0 / (1.0 + Math.Exp(-x)); //calculo el sigmoide de cada valor
+            return y * (1 - y); //la derivada del sigmoide se calcula en funcion de si misma
         }
 
         public double[] Entrenar(double[][] datos_entrenamiento, int corridas_maximas, double tasa_de_aprendizaje, double momento)
@@ -696,6 +766,11 @@ namespace IA_MLP
             double derivada = 0.0;
             double signo_error = 0.0;
 
+            //establecimos un vector con los indices para mezclarlos y poder correr los entrenamientos de manera aleatoria sobre los datos proporcionados
+            int[] secuencia = new int[datos_entrenamiento.Length];
+            for (int i = 0; i < secuencia.Length; ++i)
+                secuencia[i] = i;
+
             int errInterval = corridas_maximas / 10; //partimos las corridas maximas en 10 para ir comprobando el error
             while (corridas < corridas_maximas)
             {
@@ -704,12 +779,16 @@ namespace IA_MLP
                 if (corridas % errInterval == 0 && corridas < corridas_maximas)
                 {
                     double error = Error(datos_entrenamiento);
-                    Console.WriteLine("Error en corrida = {0}, error = {1}", corridas, error);
+
+                    ErrorEpoca ee = new ErrorEpoca(corridas, error);
+                    InformarErrorEpoca?.Invoke(this, ee);
                 }
 
+                MezclarDatos(secuencia);
                 for (int ii = 0; ii < datos_entrenamiento.Length; ++ii)
                 {
-                    Array.Copy(datos_entrenamiento[ii], valores_entrada, neuronas_c_entrada);
+                    int idx = secuencia[ii];
+                    Array.Copy(datos_entrenamiento[idx], valores_entrada, neuronas_c_entrada);
                     Array.Copy(datos_entrenamiento[ii], neuronas_c_entrada, valores_esperados_salida, 0, neuronas_c_salida);
                     ProcesarEntradas(valores_entrada);
 
@@ -717,7 +796,7 @@ namespace IA_MLP
                     for (int k = 0; k < neuronas_c_salida; ++k)
                     {
                         signo_error = valores_esperados_salida[k] - salidas_c_salida[k];  // Wikipedia uses (o-t)
-                        derivada = (1 - salidas_c_salida[k]) * salidas_c_salida[k]; // usando softmax
+                        derivada = Derivada_sigmoide(salidas_c_salida[k]); // derivada de la funcion de activacion
                         signo_gradiente_salida[k] = signo_error * derivada;
                     }
 
@@ -733,8 +812,8 @@ namespace IA_MLP
                     // 3. compute hidden node signals
                     for (int j = 0; j < neuronas_c_oculta_1; ++j)
                     {
-                        derivada = (1 + salidas_c_oculta_1[j]) * (1 - salidas_c_oculta_1[j]); // usando tangente
-                        double sum = 0.0; // need sums of output signals times hidden-to-output weights
+                        derivada = DerivadaFuncionActivacion(salidas_c_oculta_1[j]);
+                        double sum = 0.0;
                         for (int k = 0; k < neuronas_c_salida; ++k)
                         {
                             sum += signo_gradiente_salida[k] * pesos_c_oculta_1_a_c_salida[j][k];
@@ -754,7 +833,7 @@ namespace IA_MLP
                     // 3. compute hidden node signals
                     for (int j = 0; j < neuronas_c_oculta_0; ++j)
                     {
-                        derivada = (1 + salidas_c_oculta_0[j]) * (1 - salidas_c_oculta_0[j]); // usando tangente
+                        derivada = DerivadaFuncionActivacion(salidas_c_oculta_1[j]);
                         double sum = 0.0; // need sums of output signals times hidden-to-output weights
                         for (int k = 0; k < neuronas_c_oculta_1; ++k)
                         {
@@ -847,16 +926,16 @@ namespace IA_MLP
             return mejores_pesos_encontrados;
         } // fin de entrenamiento
 
-        //private void Shuffle(int[] sequence)
-        //{
-        //    for (int i = 0; i < sequence.Length; ++i)
-        //    {
-        //        int r = this.rnd.Next(i, sequence.Length);
-        //        int tmp = sequence[r];
-        //        sequence[r] = sequence[i];
-        //        sequence[i] = tmp;
-        //    }
-        //} 
+        private void MezclarDatos(int[] sequence)
+        {
+            for (int i = 0; i < sequence.Length; ++i)
+            {
+                int r = this.rnd.Next(i, sequence.Length);
+                int tmp = sequence[r];
+                sequence[r] = sequence[i];
+                sequence[i] = tmp;
+            }
+        }
 
         private double Error(double[][] datos_entrenamiento)
         {
@@ -867,8 +946,8 @@ namespace IA_MLP
             for (int i = 0; i < datos_entrenamiento.Length; ++i)
             {
                 Array.Copy(datos_entrenamiento[i], valores_entrada, neuronas_c_entrada);
-                Array.Copy(datos_entrenamiento[i], neuronas_c_entrada, valores_esperados, 0, neuronas_c_salida); // get target values
-                double[] yValues = this.ProcesarEntradas(valores_entrada); // outputs using current weights
+                Array.Copy(datos_entrenamiento[i], neuronas_c_entrada, valores_esperados, 0, neuronas_c_salida);
+                double[] yValues = this.ProcesarEntradas(valores_entrada);
                 for (int j = 0; j < neuronas_c_salida; ++j)
                 {
                     double err = valores_esperados[j] - yValues[j];
@@ -884,33 +963,48 @@ namespace IA_MLP
             int correctos = 0;
             int incorrectos = 0;
             double[] valores_entrada = new double[neuronas_c_entrada];
-            double[] valores_esperados_salida = new double[neuronas_c_salida];
+            double[] valores_esperados = new double[neuronas_c_salida];
             double[] valores_obtenidos;
 
             for (int i = 0; i < datos_de_prueba.Length; ++i)
             {
                 Array.Copy(datos_de_prueba[i], valores_entrada, neuronas_c_entrada);
-                Array.Copy(datos_de_prueba[i], neuronas_c_entrada, valores_esperados_salida, 0, neuronas_c_salida);
+                Array.Copy(datos_de_prueba[i], neuronas_c_entrada, valores_esperados, 0, neuronas_c_salida);
                 valores_obtenidos = this.ProcesarEntradas(valores_entrada);
 
-                bool correcto = true;
+                int indice1_resultado_esperado = Indice_del_valor_1(valores_esperados);
+                int indice1_resultado_obtenido = Indice_del_valor_1(valores_obtenidos);
 
-                for (int j = 0; j < neuronas_c_salida; j++)
-                {
-                    correcto = valores_esperados_salida[j] == FuncionRedondearValorSalidaABinario(valores_obtenidos[j]);
-                }
-
-                if (correcto)
+                if (indice1_resultado_esperado == indice1_resultado_obtenido)
                     ++correctos;
                 else
                     ++incorrectos;
+
             }
             return (correctos * 1.0) / (correctos + incorrectos);
         }
 
-        private double FuncionRedondearValorSalidaABinario(double valor)
+        private static int Indice_del_valor_1(double[] vector)
         {
-            return Math.Round(valor);
+            //tomo el vector de resultado obtenido y
+            //para compararlo con el vector de resultado esperado
+            //busco el maximo entre los resultados y a este indice le asigno el valor 1
+            //ya que los valores posibles de resultado son:
+            // 0 0 1 => b
+            // 0 1 0 => d
+            // 1 0 0 => f
+
+            int indice = 0;
+            double valor_maximo = vector[0];
+            for (int i = 0; i < vector.Length; ++i)
+            {
+                if (vector[i] > valor_maximo)
+                {
+                    valor_maximo = vector[i];
+                    indice = i;
+                }
+            }
+            return indice;
         }
 
     }

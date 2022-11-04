@@ -1,3 +1,5 @@
+using System.IO.Pipes;
+
 namespace IA_MLP
 {
     public partial class Form1 : Form
@@ -5,13 +7,112 @@ namespace IA_MLP
         public Form1()
         {
             InitializeComponent();
+            CheckForIllegalCrossThreadCalls = false;
         }
+
+        private int neuronas_capa_oculta1 = 0;
+        private int neuronas_capa_oculta2 = 0;
+        private int epocas = 0;
+        private double tasa_de_aprendizaje = 0;
+        private double momento = 0;
+        private string path_dataset = "";
+
 
         private void button1_Click(object sender, EventArgs e)
         {
-            if (backgroundWorker1.IsBusy != true)
+            bool datos_entrada_ok = true;
+            datos_entrada_ok = datos_entrada_ok && int.TryParse(tb_epocas.Text, out epocas);
+            datos_entrada_ok = datos_entrada_ok && double.TryParse(tb_tasa_aprendizaje.Text, out tasa_de_aprendizaje);
+            datos_entrada_ok = datos_entrada_ok && double.TryParse(tb_momento.Text, out momento);
+            /*
+             100 valores con 10 % distorción
+            100 valores con 20 % distorción
+            100 valores con 30 % distorción
+            500 valores con 10 % distorción
+            500 valores con 20 % distorción
+            500 valores con 30 % distorción
+            1000 valores con 10 % distorción
+            1000 valores con 20 % distorción
+            1000 valores con 30 % distorción
+             */
+            switch (cb_dataset.SelectedItem.ToString())
             {
-                backgroundWorker1.RunWorkerAsync();
+                case "100 valores con 10 % distorción":
+                    path_dataset = Application.StartupPath + @"\Datasets\dataset100validacion10.csv";
+                    break;
+                case "100 valores con 20 % distorción":
+                    path_dataset = Application.StartupPath + @"\Datasets\dataset100validacion10.csv";
+                    break;
+                case "100 valores con 30 % distorción":
+                    path_dataset = Application.StartupPath + @"\Datasets\dataset100validacion10.csv";
+                    break;
+                case "500 valores con 10 % distorción":
+                    path_dataset = Application.StartupPath + @"\Datasets\dataset100validacion10.csv";
+                    break;
+                case "500 valores con 20 % distorción":
+                    path_dataset = Application.StartupPath + @"\Datasets\dataset100validacion10.csv";
+                    break;
+                case "500 valores con 30 % distorción":
+                    path_dataset = Application.StartupPath + @"\Datasets\dataset100validacion10.csv";
+                    break;
+                case "1000 valores con 10 % distorción":
+                    path_dataset = Application.StartupPath + @"\Datasets\dataset1000validacion10.csv";
+                    break;
+                case "1000 valores con 20 % distorción":
+                    path_dataset = Application.StartupPath + @"\Datasets\dataset1000validacion10.csv";
+                    break;
+                case "1000 valores con 30 % distorción":
+                    path_dataset = Application.StartupPath + @"\Datasets\dataset1000validacion10.csv";
+                    break;
+                default:
+                    break;
+            }
+
+
+            if (datos_entrada_ok)
+            {
+                switch (cb_topologia.SelectedItem.ToString())
+                {
+                    case "100 - 05 - 3":
+                        neuronas_capa_oculta1 = 5;
+                        if (backgroundWorker1.IsBusy != true)
+                        {
+                            backgroundWorker1.RunWorkerAsync();
+                        }
+
+                        break;
+                    case "100 - 10 - 3":
+                        neuronas_capa_oculta1 = 10;
+                        if (backgroundWorker1.IsBusy != true)
+                        {
+                            backgroundWorker1.RunWorkerAsync();
+                        }
+                        break;
+                    case "100 - 05 - 05 - 3":
+                        neuronas_capa_oculta1 = 5;
+                        neuronas_capa_oculta2 = 5;
+                        if (backgroundWorker2.IsBusy != true)
+                        {
+                            backgroundWorker2.RunWorkerAsync();
+                        }
+                        break;
+                    case "100 - 10 - 10 - 3":
+                        neuronas_capa_oculta1 = 10;
+                        neuronas_capa_oculta2 = 10;
+                        if (backgroundWorker2.IsBusy != true)
+                        {
+                            backgroundWorker2.RunWorkerAsync();
+                        }
+                        break;
+
+
+                    default:
+                        break;
+                }
+            }
+            else
+            {
+                MessageBox.Show("Ocurrio un error en la carga de valores de ejecución, revise los datos ingresados", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
@@ -216,76 +317,177 @@ namespace IA_MLP
 
         private void backgroundWorker1_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
         {
-            List<string> lineas = new List<string>();
-            lineas.Add("\nBegin neural network back-propagation demo");
+            tb_resultados.Text = string.Empty;
+            AgregarMostrarLineasBW1(new List<string>() { " - INICIANDO EL PROCESO DE ENTRENAMIENTO - " });
 
-            backgroundWorker1.ReportProgress(1, lineas);
+            AgregarMostrarLineasBW1(new List<string>() {"Cargando los datos del dataset..."});
+            
+            string data = System.IO.File.ReadAllText(path_dataset).Replace("\r", "");
+            string[] rows = data.Split(Environment.NewLine.ToCharArray());
 
-            int numInput = 4; // number features
-            int numHidden = 5;
-            int numOutput = 3; // number of classes for Y
-            int numRows = 1000;
-            int seed = 1; // gives nice demo
+            List<double[]> trainDataList = new List<double[]>();
+            List<double[]> testDataList = new List<double[]>();
 
-            lineas.Add("\nGenerating " + numRows + " artificial data items with " + numInput + " features");
-            backgroundWorker1.ReportProgress(1, lineas);
-            double[][] allData = BackPropProgram.MakeAllData(numInput, numHidden, numOutput, numRows, seed);
-            lineas.Add("Done");
-
-            lineas.Add("\nCreating train (80%) and test (20%) matrices");
-            backgroundWorker1.ReportProgress(1, lineas);
-            double[][] trainData;
-            double[][] testData;
-            BackPropProgram.SplitTrainTest(allData, 0.80, seed, out trainData, out testData);
-            lineas.Add("Done\n");
-            backgroundWorker1.ReportProgress(1, lineas);
-            lineas.Add("Training data:");
-            List<string> matrix = ShowMatrix(trainData, 4, 2, true);
-            lineas.Add("Test data:");
-            backgroundWorker1.ReportProgress(1, lineas);
-            matrix = ShowMatrix(testData, 4, 2, true);
-            foreach (string linea in matrix)
+            for (int i = 0; i < rows.Length; i++)
             {
-                lineas.Add(linea);
+                if (rows[i] != "")
+                {
+                    string[] rowData = rows[i].Split(';');
+
+                    if (rowData[0] == "0")//to train
+                    {
+                        trainDataList.Add(new double[rowData.Length - 1]);
+                        for (int j = 1; j < rowData.Length; j++)
+                        {
+                            trainDataList[trainDataList.Count - 1][j - 1] = double.Parse(rowData[j]);
+                        }
+                    }
+                    else//to test
+                    {
+                        testDataList.Add(new double[rowData.Length - 1]);
+                        for (int j = 1; j < rowData.Length; j++)
+                        {
+                            testDataList[testDataList.Count - 1][j - 1] = double.Parse(rowData[j]);
+                        }
+                    }
+                }
             }
-            backgroundWorker1.ReportProgress(1, lineas);
-            lineas.Add("Creating a " + numInput + "-" + numHidden + "-" + numOutput + " neural network");
-            NeuralNetwork nn = new NeuralNetwork(numInput, numHidden, numOutput);
-            backgroundWorker1.ReportProgress(1, lineas);
-            int maxEpochs = 1000;
-            double learnRate = 0.05;
-            double momentum = 0.01;
-            lineas.Add("\nSetting maxEpochs = " + maxEpochs);
-            lineas.Add("Setting learnRate = " + learnRate.ToString("F2"));
-            lineas.Add("Setting momentum  = " + momentum.ToString("F2"));
-            lineas.Add("");
-            lineas.Add("\nStarting training");
-            backgroundWorker1.ReportProgress(1, lineas);
-            double[] weights = nn.Train(trainData, maxEpochs, learnRate, momentum);
-            lineas.Add("Done");
+
+            double[][] trainData = trainDataList.ToArray();
+            double[][] testData = testDataList.ToArray();
             
-            lineas.Add("\nFinal neural network model weights and biases:\n");
-            lineas.Add(ShowVector(weights, 2, 10, true));
-            backgroundWorker1.ReportProgress(1, lineas);
+            AgregarMostrarLineasBW1(new List<string>() { "Listo!" });
+
+            AgregarMostrarLineasBW1(new List<string>() { "Datos de entrenamiento:" });
+            AgregarMostrarLineasBW1(ShowMatrix(trainData, 4, 0, true));
+            AgregarMostrarLineasBW1(new List<string>() { "Datos de prueba:" });
+            AgregarMostrarLineasBW1(ShowMatrix(testData, 4, 0, true));
+
+            AgregarMostrarLineasBW1(new List<string>() { String.Format("Creando un Perceptron multicapa de 3 capas (100-{0}-3)", neuronas_capa_oculta1) });
+            Perceptron_e_o_s nn = new Perceptron_e_o_s(100, neuronas_capa_oculta1, 3);
+            nn.InformarErrorEpoca += HandleErrorEpocaBW1;
             
-            double trainAcc = nn.Accuracy(trainData);
-            lineas.Add("\nFinal accuracy on training data = " +
-              trainAcc.ToString("F4"));
-            backgroundWorker1.ReportProgress(1, lineas);
-            
-            double testAcc = nn.Accuracy(testData);
-            lineas.Add("Final accuracy on test data     = " +
-              testAcc.ToString("F4"));
-            backgroundWorker1.ReportProgress(1, lineas);
-            
-            lineas.Add("\nEnd back-propagation demo\n");
-            backgroundWorker1.ReportProgress(1, lineas);
+            AgregarMostrarLineasBW1(new List<string>() { string.Format("Máximo de epocas = {0}", epocas) });
+            AgregarMostrarLineasBW1(new List<string>() { string.Format("Tasa de aprendizaje = {0}", tasa_de_aprendizaje.ToString("F2")) });
+            AgregarMostrarLineasBW1(new List<string>() { string.Format("Momento = {0}", momento.ToString("F2")) });
+
+            AgregarMostrarLineasBW1(new List<string>() { "\nComenzando el entrenamiento..." });
+            double[] weights = nn.Entrenar(trainData, epocas, tasa_de_aprendizaje, momento);
+            AgregarMostrarLineasBW1(new List<string>() { "Terminado!" });
+            AgregarMostrarLineasBW1(new List<string>() { "Pesos y umbrales finales de la red:" });
+            AgregarMostrarLineasBW1(new List<string>() { ShowVector(weights, 4, 10, true) });
+
+            double trainAcc = nn.Precision(trainData);
+            AgregarMostrarLineasBW1(new List<string>() { string.Format("Precisión final sobre datos de entrenamiento = {0}", trainAcc.ToString("F4")) });
+
+            double testAcc = nn.Precision(testData);
+            AgregarMostrarLineasBW1(new List<string>() { string.Format("Precisión final sobre datos de prueba = {0}", testAcc.ToString("F4")) });
+
+            AgregarMostrarLineasBW1(new List<string>() { "Final del programa de entrenamiento" });
         }
 
-        private void backgroundWorker1_ProgressChanged(object sender, System.ComponentModel.ProgressChangedEventArgs e)
+        private void AgregarMostrarLineasBW1(List<string> lineas)
         {
-            List<string> lineas = (List<string>)e.UserState;
-            textBox1.Text = String.Join(Environment.NewLine, lineas);
+            List<string> lineas_a_mostrar = tb_resultados.Text.Split("\n").ToList();
+            lineas_a_mostrar.AddRange(lineas);
+
+            tb_resultados.Text = String.Join(Environment.NewLine, lineas_a_mostrar);
+
+            backgroundWorker1.ReportProgress(1);
+        }
+
+        private void HandleErrorEpocaBW1(object? sender, Perceptron_e_o_s.ErrorEpoca e)
+        {
+            List<string> errorepoca = new List<string>() { string.Format("Epoca: {0}, Error: {1}", e.Epoca, e.Error) };
+            AgregarMostrarLineasBW1(errorepoca);
+        }
+
+        private void backgroundWorker2_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
+        {
+            tb_resultados.Text = string.Empty;
+            AgregarMostrarLineasBW1(new List<string>() { " - INICIANDO EL PROCESO DE ENTRENAMIENTO - " });
+
+            AgregarMostrarLineasBW1(new List<string>() { "Cargando los datos del dataset..." });
+
+            string data = System.IO.File.ReadAllText(@"C:\Users\jfberton\Downloads\IA\MLP\Datasets\dataset100validacion10.csv").Replace("\r", "");
+            string[] rows = data.Split(Environment.NewLine.ToCharArray());
+
+            List<double[]> trainDataList = new List<double[]>();
+            List<double[]> testDataList = new List<double[]>();
+
+            for (int i = 0; i < rows.Length; i++)
+            {
+                if (rows[i] != "")
+                {
+                    string[] rowData = rows[i].Split(';');
+
+                    if (rowData[0] == "0")//to train
+                    {
+                        trainDataList.Add(new double[rowData.Length - 1]);
+                        for (int j = 1; j < rowData.Length; j++)
+                        {
+                            trainDataList[trainDataList.Count - 1][j - 1] = double.Parse(rowData[j]);
+                        }
+                    }
+                    else//to test
+                    {
+                        testDataList.Add(new double[rowData.Length - 1]);
+                        for (int j = 1; j < rowData.Length; j++)
+                        {
+                            testDataList[testDataList.Count - 1][j - 1] = double.Parse(rowData[j]);
+                        }
+                    }
+                }
+            }
+
+            double[][] trainData = trainDataList.ToArray();
+            double[][] testData = testDataList.ToArray();
+            AgregarMostrarLineasBW1(new List<string>() { "Listo!" });
+
+            AgregarMostrarLineasBW1(new List<string>() { "Datos de entrenamiento:" });
+            AgregarMostrarLineasBW1(ShowMatrix(trainData, 4, 0, true));
+            AgregarMostrarLineasBW1(new List<string>() { "Datos de prueba:" });
+            AgregarMostrarLineasBW1(ShowMatrix(testData, 4, 0, true));
+
+            AgregarMostrarLineasBW1(new List<string>() { String.Format("Creando un Perceptron multicapa de 4 capas (100-{0}-{1}-2)", neuronas_capa_oculta1, neuronas_capa_oculta2) });
+            Perceptron_e_o_o_s nn = new Perceptron_e_o_o_s(100, neuronas_capa_oculta1, neuronas_capa_oculta2, 3);
+            nn.InformarErrorEpoca += HandleErrorEpocaBW2;
+
+
+            AgregarMostrarLineasBW1(new List<string>() { string.Format("Máximo de epocas = {0}", epocas) });
+            AgregarMostrarLineasBW1(new List<string>() { string.Format("Tasa de aprendizaje = {0}", tasa_de_aprendizaje.ToString("F2")) });
+            AgregarMostrarLineasBW1(new List<string>() { string.Format("Momento = {0}", momento.ToString("F2")) });
+
+
+            AgregarMostrarLineasBW1(new List<string>() { "\nComenzando el entrenamiento..." });
+            double[] weights = nn.Entrenar(trainData, epocas, tasa_de_aprendizaje, momento);
+            AgregarMostrarLineasBW1(new List<string>() { "Terminado!" });
+            AgregarMostrarLineasBW1(new List<string>() { "Pesos y umbrales finales de la red:" });
+            AgregarMostrarLineasBW1(new List<string>() { ShowVector(weights, 4, 10, true) });
+
+            double trainAcc = nn.Precision(trainData);
+            AgregarMostrarLineasBW1(new List<string>() { string.Format("Precisión final sobre datos de entrenamiento = {0}", trainAcc.ToString("F4")) });
+
+            double testAcc = nn.Precision(testData);
+            AgregarMostrarLineasBW1(new List<string>() { string.Format("Precisión final sobre datos de prueba = {0}", testAcc.ToString("F4")) });
+
+            AgregarMostrarLineasBW1(new List<string>() { "Final del programa de entrenamiento" });
+        }
+    
+        private void AgregarMostrarLineasBW2(List<string> lineas)
+        {
+            List<string> lineas_a_mostrar = tb_resultados.Text.Split("\n").ToList();
+            lineas_a_mostrar.AddRange(lineas);
+
+            tb_resultados.Text = String.Join(Environment.NewLine, lineas_a_mostrar);
+
+            backgroundWorker2.ReportProgress(1);
+        }
+
+        private void HandleErrorEpocaBW2(object? sender, Perceptron_e_o_o_s.ErrorEpoca e)
+        {
+            List<string> errorepoca = new List<string>() { string.Format("Epoca: {0}, Error: {1}", e.Epoca, e.Error) };
+            AgregarMostrarLineasBW1(errorepoca);
         }
     }
 }
