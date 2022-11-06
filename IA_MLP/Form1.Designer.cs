@@ -36,6 +36,8 @@
             this.label4 = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
             this.panel3 = new System.Windows.Forms.Panel();
+            this.button3 = new System.Windows.Forms.Button();
+            this.panel4 = new System.Windows.Forms.Panel();
             this.tb_resultados = new System.Windows.Forms.TextBox();
             this.panel2 = new System.Windows.Forms.Panel();
             this.label5 = new System.Windows.Forms.Label();
@@ -47,8 +49,10 @@
             this.label6 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
             this.tb_epocas = new System.Windows.Forms.TextBox();
+            this.button2 = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
             this.panel3.SuspendLayout();
+            this.panel4.SuspendLayout();
             this.panel2.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -108,19 +112,39 @@
             this.panel1.Controls.Add(this.panel3);
             this.panel1.Controls.Add(this.panel2);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Right;
-            this.panel1.Location = new System.Drawing.Point(285, 0);
+            this.panel1.Location = new System.Drawing.Point(289, 0);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(515, 450);
+            this.panel1.Size = new System.Drawing.Size(515, 461);
             this.panel1.TabIndex = 3;
             // 
             // panel3
             // 
-            this.panel3.Controls.Add(this.tb_resultados);
+            this.panel3.Controls.Add(this.button3);
+            this.panel3.Controls.Add(this.panel4);
             this.panel3.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel3.Location = new System.Drawing.Point(0, 53);
             this.panel3.Name = "panel3";
-            this.panel3.Size = new System.Drawing.Size(515, 397);
+            this.panel3.Size = new System.Drawing.Size(515, 408);
             this.panel3.TabIndex = 1;
+            // 
+            // button3
+            // 
+            this.button3.Location = new System.Drawing.Point(368, 373);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(135, 23);
+            this.button3.TabIndex = 1;
+            this.button3.Text = "Guardar esta corrida";
+            this.button3.UseVisualStyleBackColor = true;
+            this.button3.Click += new System.EventHandler(this.button3_Click);
+            // 
+            // panel4
+            // 
+            this.panel4.Controls.Add(this.tb_resultados);
+            this.panel4.Dock = System.Windows.Forms.DockStyle.Top;
+            this.panel4.Location = new System.Drawing.Point(0, 0);
+            this.panel4.Name = "panel4";
+            this.panel4.Size = new System.Drawing.Size(515, 364);
+            this.panel4.TabIndex = 0;
             // 
             // tb_resultados
             // 
@@ -130,8 +154,8 @@
             this.tb_resultados.Name = "tb_resultados";
             this.tb_resultados.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.tb_resultados.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.tb_resultados.Size = new System.Drawing.Size(515, 397);
-            this.tb_resultados.TabIndex = 2;
+            this.tb_resultados.Size = new System.Drawing.Size(515, 364);
+            this.tb_resultados.TabIndex = 3;
             this.tb_resultados.WordWrap = false;
             // 
             // panel2
@@ -170,6 +194,7 @@
             // 
             // backgroundWorker2
             // 
+            this.backgroundWorker2.WorkerReportsProgress = true;
             this.backgroundWorker2.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker2_DoWork);
             // 
             // cb_topologia
@@ -234,11 +259,22 @@
             this.tb_epocas.TabIndex = 4;
             this.tb_epocas.Text = "1000";
             // 
+            // button2
+            // 
+            this.button2.Location = new System.Drawing.Point(140, 256);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(139, 30);
+            this.button2.TabIndex = 7;
+            this.button2.Text = "Probar reconocimiento";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.ClientSize = new System.Drawing.Size(804, 461);
+            this.Controls.Add(this.button2);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.cb_dataset);
             this.Controls.Add(this.cb_topologia);
@@ -252,12 +288,13 @@
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.button1);
+            this.MinimumSize = new System.Drawing.Size(820, 500);
             this.Name = "Form1";
-            this.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
             this.Text = "Form1";
             this.panel1.ResumeLayout(false);
             this.panel3.ResumeLayout(false);
-            this.panel3.PerformLayout();
+            this.panel4.ResumeLayout(false);
+            this.panel4.PerformLayout();
             this.panel2.ResumeLayout(false);
             this.panel2.PerformLayout();
             this.ResumeLayout(false);
@@ -275,7 +312,6 @@
         private Label label4;
         private Panel panel1;
         private Panel panel3;
-        private TextBox tb_resultados;
         private Panel panel2;
         private Label label5;
         private TextBox tb_tasa_aprendizaje;
@@ -286,5 +322,9 @@
         private Label label6;
         private Label label7;
         private TextBox tb_epocas;
+        private Button button2;
+        private Button button3;
+        private Panel panel4;
+        private TextBox tb_resultados;
     }
 }

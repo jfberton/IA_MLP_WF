@@ -9,7 +9,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="DataSets\" />
+    <Compile Remove="DataSets\**" />
+    <EmbeddedResource Remove="DataSets\**" />
+    <None Remove="DataSets\**" />
   </ItemGroup>
 
 </Project>

@@ -41,7 +41,6 @@ namespace IA_MLP
         {
             this.neuronas_c_entrada = neuronas_capa_entrada;
             this.neuronas_c_oculta = neuronas_capa_oculta;
-
             this.neuronas_c_salida = neuronas_capa_salida;
 
             this.entradas = new double[neuronas_c_entrada];
@@ -49,8 +48,6 @@ namespace IA_MLP
             this.pesos_c_entrada_a_c_oculta = SetearValores(neuronas_c_entrada, neuronas_capa_oculta, 0.0);
             this.umbrales_c_oculta = new double[neuronas_c_oculta];
             this.salidas_c_oculta = new double[neuronas_c_oculta];
-
-
 
             this.pesos_c_oculta_a_c_salida = SetearValores(neuronas_c_oculta, neuronas_c_salida, 0.0);
             this.umbrales_c_salida = new double[neuronas_c_salida];
@@ -60,24 +57,29 @@ namespace IA_MLP
             this.RandomizarValoresDePesosyUmbrales();
         }
 
-        private static double[][] SetearValores(int rows, int cols, double v)
+        private static double[][] SetearValores(int rows, int cols, double valor)
         {
             double[][] result = new double[rows][];
             for (int r = 0; r < result.Length; ++r)
                 result[r] = new double[cols];
             for (int i = 0; i < rows; ++i)
                 for (int j = 0; j < cols; ++j)
-                    result[i][j] = v;
+                    result[i][j] = valor;
             return result;
         }
 
         private void RandomizarValoresDePesosyUmbrales() // helper for ctor
         {
             // initialize weights and biases to small random values
-            int tamaño_ventor_pesos = (neuronas_c_entrada * neuronas_c_oculta) + neuronas_c_oculta + (neuronas_c_oculta * neuronas_c_salida) + neuronas_c_salida;
+            int tamaño_ventor_pesos = (neuronas_c_entrada * neuronas_c_oculta) 
+                + neuronas_c_oculta + (neuronas_c_oculta * neuronas_c_salida) 
+                + neuronas_c_salida;
+            
             double[] vector_pesos_umbrales = new double[tamaño_ventor_pesos];
+            
             for (int i = 0; i < vector_pesos_umbrales.Length; ++i)
                 vector_pesos_umbrales[i] = (0.001 - 0.0001) * rnd.NextDouble() + 0.0001;
+            
             this.CargarPesosyUmbrales(vector_pesos_umbrales);
         }
 
@@ -188,8 +190,8 @@ namespace IA_MLP
             for (int i = 0; i < neuronas_c_salida; ++i)  //agrego los umbrales a la sumatoria de entradas * pesos
                 salida_capa_salida[i] += umbrales_c_salida[i];
 
-            double[] softOut = Sigmoide(salida_capa_salida); //Aplico un afuncion diferente a la de la capa oculta, esto vimos que mejora los resultados
-            Array.Copy(softOut, salidas_c_salida, softOut.Length);
+            double[] salida_final_capa_salida = Sigmoide(salida_capa_salida); //Aplico un afuncion diferente a la de la capa oculta, esto vimos que mejora los resultados
+            Array.Copy(salida_final_capa_salida, salidas_c_salida, salida_final_capa_salida.Length);
 
             double[] retResult = new double[neuronas_c_salida];
             Array.Copy(salidas_c_salida, retResult, retResult.Length);
@@ -276,7 +278,7 @@ namespace IA_MLP
                 {
                     int idx = secuencia[ii];
                     Array.Copy(datos_entrenamiento[idx], valores_entrada, neuronas_c_entrada);
-                    Array.Copy(datos_entrenamiento[ii], neuronas_c_entrada, valores_esperados_salida, 0, neuronas_c_salida);
+                    Array.Copy(datos_entrenamiento[idx], neuronas_c_entrada, valores_esperados_salida, 0, neuronas_c_salida);
                     ProcesarEntradas(valores_entrada);
 
                     // indices: i = inputs, j = hiddens, k = outputs
@@ -299,7 +301,7 @@ namespace IA_MLP
                     //    los signos del gradiente a la salida
                     for (int k = 0; k < neuronas_c_salida; ++k)
                         gradientes_umbrales_salida[k] = signo_gradiente_salida[k] * 1.0;
-
+                    /*--------------------------------------*/
                     // 3. Obtener los signos de error de los nodos de la capa oculta
                     for (int j = 0; j < neuronas_c_oculta; ++j)
                     {
@@ -433,7 +435,7 @@ namespace IA_MLP
             return (correctos * 1.0) / (correctos + incorrectos);
         }
 
-        private static int Indice_del_valor_1(double[] vector)
+        public static int Indice_del_valor_1(double[] vector)
         {
             //tomo el vector de resultado obtenido y
             //para compararlo con el vector de resultado esperado
@@ -789,7 +791,7 @@ namespace IA_MLP
                 {
                     int idx = secuencia[ii];
                     Array.Copy(datos_entrenamiento[idx], valores_entrada, neuronas_c_entrada);
-                    Array.Copy(datos_entrenamiento[ii], neuronas_c_entrada, valores_esperados_salida, 0, neuronas_c_salida);
+                    Array.Copy(datos_entrenamiento[idx], neuronas_c_entrada, valores_esperados_salida, 0, neuronas_c_salida);
                     ProcesarEntradas(valores_entrada);
 
                     // 1. compute output node signals (assumes softmax)

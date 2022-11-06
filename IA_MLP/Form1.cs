@@ -8,6 +8,8 @@ namespace IA_MLP
         {
             InitializeComponent();
             CheckForIllegalCrossThreadCalls = false;
+            cb_dataset.SelectedIndex = 0;
+            cb_topologia.SelectedIndex = 0;
         }
 
         private int neuronas_capa_oculta1 = 0;
@@ -16,6 +18,8 @@ namespace IA_MLP
         private double tasa_de_aprendizaje = 0;
         private double momento = 0;
         private string path_dataset = "";
+        private double[] pesos_y_umbrales;
+        private string path_entrenamiento;
 
 
         private void button1_Click(object sender, EventArgs e)
@@ -38,31 +42,31 @@ namespace IA_MLP
             switch (cb_dataset.SelectedItem.ToString())
             {
                 case "100 valores con 10 % distorción":
-                    path_dataset = Application.StartupPath + @"\Datasets\dataset100validacion10.csv";
+                    path_dataset = Application.StartupPath + @"Datasets\datasets100validacion10.txt";
                     break;
                 case "100 valores con 20 % distorción":
-                    path_dataset = Application.StartupPath + @"\Datasets\dataset100validacion10.csv";
+                    path_dataset = Application.StartupPath + @"Datasets\datasets100validacion20.txt";
                     break;
                 case "100 valores con 30 % distorción":
-                    path_dataset = Application.StartupPath + @"\Datasets\dataset100validacion10.csv";
+                    path_dataset = Application.StartupPath + @"Datasets\datasets100validacion30.txt";
                     break;
                 case "500 valores con 10 % distorción":
-                    path_dataset = Application.StartupPath + @"\Datasets\dataset100validacion10.csv";
+                    path_dataset = Application.StartupPath + @"Datasets\datasets500validacion10.txt";
                     break;
                 case "500 valores con 20 % distorción":
-                    path_dataset = Application.StartupPath + @"\Datasets\dataset100validacion10.csv";
+                    path_dataset = Application.StartupPath + @"Datasets\datasets500validacion20.txt";
                     break;
                 case "500 valores con 30 % distorción":
-                    path_dataset = Application.StartupPath + @"\Datasets\dataset100validacion10.csv";
+                    path_dataset = Application.StartupPath + @"Datasets\datasets500validacion30.txt";
                     break;
                 case "1000 valores con 10 % distorción":
-                    path_dataset = Application.StartupPath + @"\Datasets\dataset1000validacion10.csv";
+                    path_dataset = Application.StartupPath + @"Datasets\datasets1000validacion10.txt";
                     break;
                 case "1000 valores con 20 % distorción":
-                    path_dataset = Application.StartupPath + @"\Datasets\dataset1000validacion10.csv";
+                    path_dataset = Application.StartupPath + @"Datasets\datasets1000validacion20.txt";
                     break;
                 case "1000 valores con 30 % distorción":
-                    path_dataset = Application.StartupPath + @"\Datasets\dataset1000validacion10.csv";
+                    path_dataset = Application.StartupPath + @"Datasets\datasets1000validacion30.txt";
                     break;
                 default:
                     break;
@@ -318,6 +322,8 @@ namespace IA_MLP
         private void backgroundWorker1_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
         {
             tb_resultados.Text = string.Empty;
+            path_entrenamiento = Application.StartupPath + string.Format(@"Datasets\pesos_umbrales_100_{0}_3.txt", neuronas_capa_oculta1);
+
             AgregarMostrarLineasBW1(new List<string>() { " - INICIANDO EL PROCESO DE ENTRENAMIENTO - " });
 
             AgregarMostrarLineasBW1(new List<string>() {"Cargando los datos del dataset..."});
@@ -372,10 +378,11 @@ namespace IA_MLP
             AgregarMostrarLineasBW1(new List<string>() { string.Format("Momento = {0}", momento.ToString("F2")) });
 
             AgregarMostrarLineasBW1(new List<string>() { "\nComenzando el entrenamiento..." });
-            double[] weights = nn.Entrenar(trainData, epocas, tasa_de_aprendizaje, momento);
+            pesos_y_umbrales = nn.Entrenar(trainData, epocas, tasa_de_aprendizaje, momento);
+            
             AgregarMostrarLineasBW1(new List<string>() { "Terminado!" });
             AgregarMostrarLineasBW1(new List<string>() { "Pesos y umbrales finales de la red:" });
-            AgregarMostrarLineasBW1(new List<string>() { ShowVector(weights, 4, 10, true) });
+            AgregarMostrarLineasBW1(new List<string>() { ShowVector(pesos_y_umbrales, 4, 10, true) });
 
             double trainAcc = nn.Precision(trainData);
             AgregarMostrarLineasBW1(new List<string>() { string.Format("Precisión final sobre datos de entrenamiento = {0}", trainAcc.ToString("F4")) });
@@ -383,10 +390,10 @@ namespace IA_MLP
             double testAcc = nn.Precision(testData);
             AgregarMostrarLineasBW1(new List<string>() { string.Format("Precisión final sobre datos de prueba = {0}", testAcc.ToString("F4")) });
 
-            AgregarMostrarLineasBW1(new List<string>() { "Final del programa de entrenamiento" });
+            AgregarMostrarLineasBW1(new List<string>() { "Final del programa de entrenamiento" }, true);
         }
 
-        private void AgregarMostrarLineasBW1(List<string> lineas)
+        private void AgregarMostrarLineasBW1(List<string> lineas, bool termino = false)
         {
             List<string> lineas_a_mostrar = tb_resultados.Text.Split("\n").ToList();
             lineas_a_mostrar.AddRange(lineas);
@@ -394,6 +401,8 @@ namespace IA_MLP
             tb_resultados.Text = String.Join(Environment.NewLine, lineas_a_mostrar);
 
             backgroundWorker1.ReportProgress(1);
+            if (termino)
+                MessageBox.Show("Entrenamiento finalizado");
         }
 
         private void HandleErrorEpocaBW1(object? sender, Perceptron_e_o_s.ErrorEpoca e)
@@ -405,11 +414,13 @@ namespace IA_MLP
         private void backgroundWorker2_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
         {
             tb_resultados.Text = string.Empty;
-            AgregarMostrarLineasBW1(new List<string>() { " - INICIANDO EL PROCESO DE ENTRENAMIENTO - " });
+            string path_entrenamiento = Application.StartupPath + String.Format(@"Datasets\pesos_umbrales_100_{0}_{1}_3.txt", neuronas_capa_oculta1, neuronas_capa_oculta2);
 
-            AgregarMostrarLineasBW1(new List<string>() { "Cargando los datos del dataset..." });
+            AgregarMostrarLineasBW2(new List<string>() { " - INICIANDO EL PROCESO DE ENTRENAMIENTO - " });
 
-            string data = System.IO.File.ReadAllText(@"C:\Users\jfberton\Downloads\IA\MLP\Datasets\dataset100validacion10.csv").Replace("\r", "");
+            AgregarMostrarLineasBW2(new List<string>() { "Cargando los datos del dataset..." });
+
+            string data = System.IO.File.ReadAllText(path_dataset).Replace("\r", "");
             string[] rows = data.Split(Environment.NewLine.ToCharArray());
 
             List<double[]> trainDataList = new List<double[]>();
@@ -442,52 +453,66 @@ namespace IA_MLP
 
             double[][] trainData = trainDataList.ToArray();
             double[][] testData = testDataList.ToArray();
-            AgregarMostrarLineasBW1(new List<string>() { "Listo!" });
 
-            AgregarMostrarLineasBW1(new List<string>() { "Datos de entrenamiento:" });
-            AgregarMostrarLineasBW1(ShowMatrix(trainData, 4, 0, true));
-            AgregarMostrarLineasBW1(new List<string>() { "Datos de prueba:" });
-            AgregarMostrarLineasBW1(ShowMatrix(testData, 4, 0, true));
+            AgregarMostrarLineasBW2(new List<string>() { "Listo!" });
 
-            AgregarMostrarLineasBW1(new List<string>() { String.Format("Creando un Perceptron multicapa de 4 capas (100-{0}-{1}-2)", neuronas_capa_oculta1, neuronas_capa_oculta2) });
+            AgregarMostrarLineasBW2(new List<string>() { "Datos de entrenamiento:" });
+            AgregarMostrarLineasBW2(ShowMatrix(trainData, 4, 0, true));
+            AgregarMostrarLineasBW2(new List<string>() { "Datos de prueba:" });
+            AgregarMostrarLineasBW2(ShowMatrix(testData, 4, 0, true));
+
+            AgregarMostrarLineasBW2(new List<string>() { String.Format("Creando un Perceptron multicapa de 4 capas (100-{0}-{1}-2)", neuronas_capa_oculta1, neuronas_capa_oculta2) });
             Perceptron_e_o_o_s nn = new Perceptron_e_o_o_s(100, neuronas_capa_oculta1, neuronas_capa_oculta2, 3);
             nn.InformarErrorEpoca += HandleErrorEpocaBW2;
 
+            AgregarMostrarLineasBW2(new List<string>() { string.Format("Máximo de epocas = {0}", epocas) });
+            AgregarMostrarLineasBW2(new List<string>() { string.Format("Tasa de aprendizaje = {0}", tasa_de_aprendizaje.ToString("F2")) });
+            AgregarMostrarLineasBW2(new List<string>() { string.Format("Momento = {0}", momento.ToString("F2")) });
 
-            AgregarMostrarLineasBW1(new List<string>() { string.Format("Máximo de epocas = {0}", epocas) });
-            AgregarMostrarLineasBW1(new List<string>() { string.Format("Tasa de aprendizaje = {0}", tasa_de_aprendizaje.ToString("F2")) });
-            AgregarMostrarLineasBW1(new List<string>() { string.Format("Momento = {0}", momento.ToString("F2")) });
+            AgregarMostrarLineasBW2(new List<string>() { "\nComenzando el entrenamiento..." });
+            pesos_y_umbrales = nn.Entrenar(trainData, epocas, tasa_de_aprendizaje, momento);
 
-
-            AgregarMostrarLineasBW1(new List<string>() { "\nComenzando el entrenamiento..." });
-            double[] weights = nn.Entrenar(trainData, epocas, tasa_de_aprendizaje, momento);
-            AgregarMostrarLineasBW1(new List<string>() { "Terminado!" });
-            AgregarMostrarLineasBW1(new List<string>() { "Pesos y umbrales finales de la red:" });
-            AgregarMostrarLineasBW1(new List<string>() { ShowVector(weights, 4, 10, true) });
+            AgregarMostrarLineasBW2(new List<string>() { "Terminado!" });
+            AgregarMostrarLineasBW2(new List<string>() { "Pesos y umbrales finales de la red:" });
+            AgregarMostrarLineasBW2(new List<string>() { ShowVector(pesos_y_umbrales, 4, 10, true) });
 
             double trainAcc = nn.Precision(trainData);
-            AgregarMostrarLineasBW1(new List<string>() { string.Format("Precisión final sobre datos de entrenamiento = {0}", trainAcc.ToString("F4")) });
+            AgregarMostrarLineasBW2(new List<string>() { string.Format("Precisión final sobre datos de entrenamiento = {0}", trainAcc.ToString("F4")) });
 
             double testAcc = nn.Precision(testData);
-            AgregarMostrarLineasBW1(new List<string>() { string.Format("Precisión final sobre datos de prueba = {0}", testAcc.ToString("F4")) });
+            AgregarMostrarLineasBW2(new List<string>() { string.Format("Precisión final sobre datos de prueba = {0}", testAcc.ToString("F4")) });
 
-            AgregarMostrarLineasBW1(new List<string>() { "Final del programa de entrenamiento" });
+            AgregarMostrarLineasBW2(new List<string>() { "Final del programa de entrenamiento" }, true);
         }
     
-        private void AgregarMostrarLineasBW2(List<string> lineas)
+        private void AgregarMostrarLineasBW2(List<string> lineas, bool termino = false)
         {
             List<string> lineas_a_mostrar = tb_resultados.Text.Split("\n").ToList();
             lineas_a_mostrar.AddRange(lineas);
-
+            
             tb_resultados.Text = String.Join(Environment.NewLine, lineas_a_mostrar);
-
+            
             backgroundWorker2.ReportProgress(1);
+            if(termino)
+                MessageBox.Show("Entrenamiento finalizado");
         }
 
         private void HandleErrorEpocaBW2(object? sender, Perceptron_e_o_o_s.ErrorEpoca e)
         {
             List<string> errorepoca = new List<string>() { string.Format("Epoca: {0}, Error: {1}", e.Epoca, e.Error) };
-            AgregarMostrarLineasBW1(errorepoca);
+            AgregarMostrarLineasBW2(errorepoca);
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            Form2 f2 = new Form2();
+            f2.Show();
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            File.WriteAllLines(path_entrenamiento, pesos_y_umbrales.Select(d => d.ToString()));
+            MessageBox.Show("Se guardaron los pesos y umbrales en el archivo \r" + path_entrenamiento, "Exito!", MessageBoxButtons.OK);
         }
     }
 }
