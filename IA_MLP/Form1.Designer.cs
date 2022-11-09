@@ -217,16 +217,15 @@
             this.cb_dataset.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cb_dataset.FormattingEnabled = true;
             this.cb_dataset.Items.AddRange(new object[] {
-            "100 valores con 10 % distorción",
-            "100 valores con 20 % distorción",
-            "100 valores con 30 % distorción",
-            "500 valores con 10 % distorción",
-            "500 valores con 20 % distorción",
-            "500 valores con 30 % distorción",
-            "1000 valores con 10 % distorción",
-            "1000 valores con 20 % distorción",
-            "1000 valores con 30 % distorción",
-            ""});
+            "100 valores con 10 % de prueba",
+            "100 valores con 20 % de prueba",
+            "100 valores con 30 % de prueba",
+            "500 valores con 10 % de prueba",
+            "500 valores con 20 % de prueba",
+            "500 valores con 30 % de prueba",
+            "1000 valores con 10 % de prueba",
+            "1000 valores con 20 % de prueba",
+            "1000 valores con 30 % de prueba"});
             this.cb_dataset.Location = new System.Drawing.Point(85, 85);
             this.cb_dataset.Name = "cb_dataset";
             this.cb_dataset.RightToLeft = System.Windows.Forms.RightToLeft.No;

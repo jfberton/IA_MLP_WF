@@ -29,43 +29,43 @@ namespace IA_MLP
             datos_entrada_ok = datos_entrada_ok && double.TryParse(tb_tasa_aprendizaje.Text, out tasa_de_aprendizaje);
             datos_entrada_ok = datos_entrada_ok && double.TryParse(tb_momento.Text, out momento);
             /*
-             100 valores con 10 % distorción
-            100 valores con 20 % distorción
-            100 valores con 30 % distorción
-            500 valores con 10 % distorción
-            500 valores con 20 % distorción
-            500 valores con 30 % distorción
-            1000 valores con 10 % distorción
-            1000 valores con 20 % distorción
-            1000 valores con 30 % distorción
+             100 valores con 10 % de prueba
+100 valores con 20 % de prueba
+100 valores con 30 % de prueba
+500 valores con 10 % de prueba
+500 valores con 20 % de prueba
+500 valores con 30 % de prueba
+1000 valores con 10 % de prueba
+1000 valores con 20 % de prueba
+1000 valores con 30 % de prueba
              */
             switch (cb_dataset.SelectedItem.ToString())
             {
-                case "100 valores con 10 % distorción":
+                case "100 valores con 10 % de prueba":
                     path_dataset = Application.StartupPath + @"Datasets\datasets100validacion10.txt";
                     break;
-                case "100 valores con 20 % distorción":
+                case "100 valores con 20 % de prueba":
                     path_dataset = Application.StartupPath + @"Datasets\datasets100validacion20.txt";
                     break;
-                case "100 valores con 30 % distorción":
+                case "100 valores con 30 % de prueba":
                     path_dataset = Application.StartupPath + @"Datasets\datasets100validacion30.txt";
                     break;
-                case "500 valores con 10 % distorción":
+                case "500 valores con 10 % de prueba":
                     path_dataset = Application.StartupPath + @"Datasets\datasets500validacion10.txt";
                     break;
-                case "500 valores con 20 % distorción":
+                case "500 valores con 20 % de prueba":
                     path_dataset = Application.StartupPath + @"Datasets\datasets500validacion20.txt";
                     break;
-                case "500 valores con 30 % distorción":
+                case "500 valores con 30 % de prueba":
                     path_dataset = Application.StartupPath + @"Datasets\datasets500validacion30.txt";
                     break;
-                case "1000 valores con 10 % distorción":
+                case "1000 valores con 10 % de prueba":
                     path_dataset = Application.StartupPath + @"Datasets\datasets1000validacion10.txt";
                     break;
-                case "1000 valores con 20 % distorción":
+                case "1000 valores con 20 % de prueba":
                     path_dataset = Application.StartupPath + @"Datasets\datasets1000validacion20.txt";
                     break;
-                case "1000 valores con 30 % distorción":
+                case "1000 valores con 30 % de prueba":
                     path_dataset = Application.StartupPath + @"Datasets\datasets1000validacion30.txt";
                     break;
                 default:
