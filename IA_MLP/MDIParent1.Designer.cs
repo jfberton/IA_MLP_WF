@@ -99,9 +99,8 @@
             // toolStripStatusLabel1
             // 
             this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            this.toolStripStatusLabel1.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
-            this.toolStripStatusLabel1.Size = new System.Drawing.Size(292, 17);
-            this.toolStripStatusLabel1.Text = "Inteligencia Artificial  - 5to año - UTN FRRe - Año 2022";
+            this.toolStripStatusLabel1.Size = new System.Drawing.Size(348, 17);
+            this.toolStripStatusLabel1.Text = "Inteligencia Artificial  -  Grupo 7 - 5to año - UTN FRRe - Año 2022";
             this.toolStripStatusLabel1.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // MDIParent1
