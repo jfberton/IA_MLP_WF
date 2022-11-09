@@ -68,7 +68,7 @@ namespace IA_MLP
             return result;
         }
 
-        private void RandomizarValoresDePesosyUmbrales() // helper for ctor
+        private void RandomizarValoresDePesosyUmbrales()
         {
             // initialize weights and biases to small random values
             int tamaño_ventor_pesos = (neuronas_c_entrada * neuronas_c_oculta) 
@@ -93,7 +93,7 @@ namespace IA_MLP
             if (vector_pesos_umbrales.Length != tamaño_ventor_pesos_esperado)
                 throw new Exception("El tamaño del vector de pesos y umbrales no coincide con la topología de la red");
 
-            int k = 0; // points into weights param
+            int k = 0;
 
             for (int i = 0; i < neuronas_c_entrada; ++i)
             {
@@ -232,8 +232,6 @@ namespace IA_MLP
 
         public double[] Entrenar(double[][] datos_entrenamiento, int corridas_maximas, double tasa_de_aprendizaje, double momento)
         {
-            // train using back-prop
-            // back-prop specific arrays
             double[][] gradientes_pesos_oculta_salida = SetearValores(neuronas_c_oculta, neuronas_c_salida, 0.0);
             double[] gradientes_umbrales_salida = new double[neuronas_c_salida];
 
@@ -243,7 +241,6 @@ namespace IA_MLP
             double[] signo_gradiente_salida = new double[neuronas_c_salida];
             double[] signo_gradiente_capa_oculta = new double[neuronas_c_oculta];
 
-            // back-prop momentum specific arrays 
             double[][] delta_valores_previos_pesos_entrada_oculta = SetearValores(neuronas_c_entrada, neuronas_c_oculta, 0.0);
             double[] delta_valores_previos_umbrales_oculta = new double[neuronas_c_oculta];
             double[][] delta_valores_previos_pesos_oculta_salida = SetearValores(neuronas_c_oculta, neuronas_c_salida, 0.0);
@@ -375,7 +372,7 @@ namespace IA_MLP
 
             double[] mejores_pesos_encontrados = ObtenerPesosUmbrales();
             return mejores_pesos_encontrados;
-        } // fin de entrenamiento
+        }
 
         private void MezclarDatos(int[] datos_entrenamiento)
         {
@@ -542,7 +539,7 @@ namespace IA_MLP
             return tamaño_ventor_pesos;
         }
 
-        private void RandomizarValoresDePesosyUmbrales() // helper for ctor
+        private void RandomizarValoresDePesosyUmbrales()
         {
             double[] vector_pesos_umbrales = new double[obtener_tamaño_vector_pesos_y_umbrales()];
 
@@ -560,7 +557,7 @@ namespace IA_MLP
             if (vector_pesos_umbrales.Length != obtener_tamaño_vector_pesos_y_umbrales())
                 throw new Exception("El tamaño del vector de pesos y umbrales no coincide con la topología de la red");
 
-            int k = 0; // points into weights param
+            int k = 0;
 
             for (int i = 0; i < neuronas_c_entrada; ++i)
             {
@@ -696,8 +693,8 @@ namespace IA_MLP
             for (int i = 0; i < neuronas_c_salida; ++i)  //agrego los umbrales a la sumatoria de entradas * pesos
                 salida_capa_salida[i] += umbrales_c_salida[i];
 
-            double[] softOut = Sigmoide(salida_capa_salida); //Aplico un afuncion diferente a la de la capa oculta, esto vimos que mejora los resultados
-            Array.Copy(softOut, salidas_c_salida, softOut.Length);
+            double[] salida_final_capa_salida = Sigmoide(salida_capa_salida); //Aplico un afuncion diferente a la de la capa oculta, esto vimos que mejora los resultados
+            Array.Copy(salida_final_capa_salida, salidas_c_salida, softOut.Length);
 
             double[] retResult = new double[neuronas_c_salida];
             Array.Copy(salidas_c_salida, retResult, retResult.Length);
@@ -737,8 +734,6 @@ namespace IA_MLP
 
         public double[] Entrenar(double[][] datos_entrenamiento, int corridas_maximas, double tasa_de_aprendizaje, double momento)
         {
-            // train using back-prop
-            // back-prop specific arrays
             double[][] gradientes_pesos_c_oculta_1_c_salida = SetearValores(neuronas_c_oculta_1, neuronas_c_salida, 0.0);
             double[] gradientes_umbrales_salida = new double[neuronas_c_salida];
 
@@ -752,7 +747,6 @@ namespace IA_MLP
             double[] signo_gradiente_c_oculta_1 = new double[neuronas_c_oculta_1];
             double[] signo_gradiente_c_oculta_0 = new double[neuronas_c_oculta_0];
 
-            // back-prop momentum specific arrays 
             double[][] delta_valores_previos_pesos_c_entrada_c_oculta_0 = SetearValores(neuronas_c_entrada, neuronas_c_oculta_0, 0.0);
             double[] delta_valores_previos_umbrales_c_oculta_0 = new double[neuronas_c_oculta_0];
 
@@ -794,7 +788,6 @@ namespace IA_MLP
                     Array.Copy(datos_entrenamiento[idx], neuronas_c_entrada, valores_esperados_salida, 0, neuronas_c_salida);
                     ProcesarEntradas(valores_entrada);
 
-                    // 1. compute output node signals (assumes softmax)
                     for (int k = 0; k < neuronas_c_salida; ++k)
                     {
                         signo_error = valores_esperados_salida[k] - salidas_c_salida[k];  // Wikipedia uses (o-t)
@@ -802,16 +795,13 @@ namespace IA_MLP
                         signo_gradiente_salida[k] = signo_error * derivada;
                     }
 
-                    // 2. compute hidden-to-output weight gradients using output signals
                     for (int j = 0; j < neuronas_c_oculta_1; ++j)
                         for (int k = 0; k < neuronas_c_salida; ++k)
                             gradientes_pesos_c_oculta_1_c_salida[j][k] = signo_gradiente_salida[k] * salidas_c_oculta_1[j];
 
-                    // 2b. compute output bias gradients using output signals
                     for (int k = 0; k < neuronas_c_salida; ++k)
                         gradientes_umbrales_salida[k] = signo_gradiente_salida[k] * 1.0;
 
-                    // 3. compute hidden node signals
                     for (int j = 0; j < neuronas_c_oculta_1; ++j)
                     {
                         derivada = DerivadaFuncionActivacion(salidas_c_oculta_1[j]);
@@ -823,16 +813,13 @@ namespace IA_MLP
                         signo_gradiente_c_oculta_1[j] = derivada * sum;
                     }
 
-                    // 2. compute hidden-to-output weight gradients using output signals
                     for (int j = 0; j < neuronas_c_oculta_0; ++j)
                         for (int k = 0; k < neuronas_c_oculta_1; ++k)
                             gradientes_pesos_c_oculta_0_oculta_1[j][k] = signo_gradiente_c_oculta_1[k] * salidas_c_oculta_0[j];
 
-                    // 2b. compute output bias gradients using output signals
                     for (int k = 0; k < neuronas_c_salida; ++k)
                         gradientes_umbrales_oculta_1[k] = signo_gradiente_c_oculta_1[k] * 1.0;
 
-                    // 3. compute hidden node signals
                     for (int j = 0; j < neuronas_c_oculta_0; ++j)
                     {
                         derivada = DerivadaFuncionActivacion(salidas_c_oculta_1[j]);
@@ -844,18 +831,13 @@ namespace IA_MLP
                         signo_gradiente_c_oculta_0[j] = derivada * sum;
                     }
 
-                    // 4. compute input-hidden weight gradients
                     for (int i = 0; i < neuronas_c_entrada; ++i)
                         for (int j = 0; j < neuronas_c_oculta_0; ++j)
                             gradientes_pesos_c_entrada_c_oculta_0[i][j] = signo_gradiente_c_oculta_0[j] * entradas[i];
 
-                    // 4b. compute hidden node bias gradients
                     for (int j = 0; j < neuronas_c_oculta_0; ++j)
                         gradientes_umbrales_oculta_0[j] = signo_gradiente_c_oculta_0[j] * 1.0;
 
-                    // == update weights and biases
-
-                    // update input-to-hidden weights
                     for (int i = 0; i < neuronas_c_entrada; ++i)
                     {
                         for (int j = 0; j < neuronas_c_oculta_0; ++j)
@@ -867,7 +849,6 @@ namespace IA_MLP
                         }
                     }
 
-                    // update hidden biases
                     for (int j = 0; j < neuronas_c_oculta_0; ++j)
                     {
                         double delta = gradientes_umbrales_oculta_0[j] * tasa_de_aprendizaje;
@@ -876,9 +857,6 @@ namespace IA_MLP
                         delta_valores_previos_umbrales_c_oculta_0[j] = delta;
                     }
 
-
-
-                    // update input-to-hidden weights
                     for (int i = 0; i < neuronas_c_oculta_0; ++i)
                     {
                         for (int j = 0; j < neuronas_c_oculta_1; ++j)
@@ -890,7 +868,6 @@ namespace IA_MLP
                         }
                     }
 
-                    // update hidden biases
                     for (int j = 0; j < neuronas_c_oculta_1; ++j)
                     {
                         double delta = gradientes_umbrales_oculta_1[j] * tasa_de_aprendizaje;
@@ -899,7 +876,6 @@ namespace IA_MLP
                         delta_valores_previos_umbrales_c_oculta_1[j] = delta;
                     }
 
-                    // update hidden-to-output weights
                     for (int j = 0; j < neuronas_c_oculta_0; ++j)
                     {
                         for (int k = 0; k < neuronas_c_salida; ++k)
@@ -911,7 +887,6 @@ namespace IA_MLP
                         }
                     }
 
-                    // update output node biases
                     for (int k = 0; k < neuronas_c_salida; ++k)
                     {
                         double delta = gradientes_umbrales_salida[k] * tasa_de_aprendizaje;
@@ -926,7 +901,7 @@ namespace IA_MLP
 
             double[] mejores_pesos_encontrados = ObtenerPesosUmbrales();
             return mejores_pesos_encontrados;
-        } // fin de entrenamiento
+        }
 
         private void MezclarDatos(int[] sequence)
         {
