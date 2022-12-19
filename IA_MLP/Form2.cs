@@ -240,7 +240,8 @@ namespace IA_MLP
             //lbl_error_global.Text = error_global.ToString("#0.00%");
             lbl_precision.Text = (correcto.Count(c => c == "Si") * 1.0 / letras_distorcionadas.Length).ToString("#0.00%");
 
-            label5.Visible = label6.Visible = label7.Visible = label8.Visible = true;
+            label5.Visible = label8.Visible = label7.Visible = true;
+            label6.Visible = false;
             lbl_error_global.Visible = false;
             lbl_precision.Visible = lbl_letra_original.Visible = lbl_letra_reconocida.Visible = true;
         }

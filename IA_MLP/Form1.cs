@@ -439,7 +439,7 @@ namespace IA_MLP
         private void backgroundWorker2_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
         {
             tb_resultados.Text = string.Empty;
-            string path_entrenamiento = Application.StartupPath + String.Format(@"Datasets\pesos_umbrales_100_{0}_{1}_3.txt", neuronas_capa_oculta1, neuronas_capa_oculta2);
+            path_entrenamiento = Application.StartupPath + String.Format(@"Datasets\pesos_umbrales_100_{0}_{1}_3.txt", neuronas_capa_oculta1, neuronas_capa_oculta2);
 
             AgregarMostrarLineasBW2(new List<string>() { " - INICIANDO EL PROCESO DE ENTRENAMIENTO - " });
 
