@@ -8,6 +8,8 @@ namespace IA_MLP
 {
     public class Perceptron_e_o_s
     {
+        public double[] errores;
+        public double ultimo_error;
         private int neuronas_c_entrada;
         private int neuronas_c_oculta;
         private int neuronas_c_salida;
@@ -232,14 +234,16 @@ namespace IA_MLP
 
         public double[] Entrenar(double[][] datos_entrenamiento, int corridas_maximas, double tasa_de_aprendizaje, double momento)
         {
+            //Seteo los valores a cero
+            
             double[][] gradientes_pesos_oculta_salida = SetearValores(neuronas_c_oculta, neuronas_c_salida, 0.0);
             double[] gradientes_umbrales_salida = new double[neuronas_c_salida];
 
             double[][] gradientes_pesos_entrada_oculta = SetearValores(neuronas_c_entrada, neuronas_c_oculta, 0.0);
             double[] gradientes_umbrales_oculta = new double[neuronas_c_oculta];
 
-            double[] signo_gradiente_salida = new double[neuronas_c_salida];
-            double[] signo_gradiente_capa_oculta = new double[neuronas_c_oculta];
+            double[] gradiente_salida = new double[neuronas_c_salida];
+            double[] gradiente_capa_oculta = new double[neuronas_c_oculta];
 
             double[][] delta_valores_previos_pesos_entrada_oculta = SetearValores(neuronas_c_entrada, neuronas_c_oculta, 0.0);
             double[] delta_valores_previos_umbrales_oculta = new double[neuronas_c_oculta];
@@ -250,8 +254,10 @@ namespace IA_MLP
             double[] valores_entrada = new double[neuronas_c_entrada];
             double[] valores_esperados_salida = new double[neuronas_c_salida];
             double derivada = 0.0;
-            double signo_error = 0.0;
+            double error = 0.0;
 
+            this.errores = new double[corridas_maximas];
+            
             //establecimos un vector con los indices para mezclarlos y poder correr los entrenamientos de manera aleatoria sobre los datos proporcionados
             int[] secuencia = new int[datos_entrenamiento.Length];
             for (int i = 0; i < secuencia.Length; ++i)
@@ -262,11 +268,12 @@ namespace IA_MLP
             {
                 ++corridas;
 
+                ultimo_error = Error(datos_entrenamiento);
+                errores[corridas - 1] = ultimo_error;
+                
                 if (corridas % errInterval == 0 && corridas < corridas_maximas)
                 {
-                    double error = Error(datos_entrenamiento);
-
-                    ErrorEpoca ee = new ErrorEpoca(corridas, error);
+                    ErrorEpoca ee = new ErrorEpoca(corridas, ultimo_error);
                     InformarErrorEpoca?.Invoke(this, ee);
                 }
 
@@ -283,23 +290,23 @@ namespace IA_MLP
                     // 1. Obtener el signo del error en la salida
                     for (int k = 0; k < neuronas_c_salida; ++k)
                     {
-                        signo_error = valores_esperados_salida[k] - salidas_c_salida[k];
+                        error = valores_esperados_salida[k] - salidas_c_salida[k];
                         derivada = Derivada_sigmoide(salidas_c_salida[k]);
-                        signo_gradiente_salida[k] = signo_error * derivada;
+                        gradiente_salida[k] = error * derivada;
                     }
 
                     // 2. Obtener los gradientes de los pesos de las conexiones capa oculta - capa salida utilizando
-                    //    los signos del gradiente a la salida
+                    //    los gradientes a la salida
                     for (int j = 0; j < neuronas_c_oculta; ++j)
                         for (int k = 0; k < neuronas_c_salida; ++k)
-                            gradientes_pesos_oculta_salida[j][k] = signo_gradiente_salida[k] * salidas_c_oculta[j];
+                            gradientes_pesos_oculta_salida[j][k] = gradiente_salida[k] * salidas_c_oculta[j];
 
                     // 2b. Obtener los gradientes de los umbrales de las neuronas de la capa salida utilizando
-                    //    los signos del gradiente a la salida
+                    //    los gradientes a la salida
                     for (int k = 0; k < neuronas_c_salida; ++k)
-                        gradientes_umbrales_salida[k] = signo_gradiente_salida[k] * 1.0;
+                        gradientes_umbrales_salida[k] = gradiente_salida[k] * 1.0;
                     /*--------------------------------------*/
-                    // 3. Obtener los signos de error de los nodos de la capa oculta
+                    // 3. Obtener los errores de los nodos de la capa oculta
                     for (int j = 0; j < neuronas_c_oculta; ++j)
                     {
                         derivada = DerivadaFuncionActivacion(salidas_c_oculta[j]); //<- 1 es porque la funcion de transferencia lineal derivada es 1;
@@ -308,19 +315,19 @@ namespace IA_MLP
                         double sum = 0.0;
                         for (int k = 0; k < neuronas_c_salida; ++k)
                         {
-                            sum += signo_gradiente_salida[k] * pesos_c_oculta_a_c_salida[j][k];
+                            sum += gradiente_salida[k] * pesos_c_oculta_a_c_salida[j][k];
                         }
-                        signo_gradiente_capa_oculta[j] = derivada * sum;
+                        gradiente_capa_oculta[j] = derivada * sum;
                     }
 
                     // 4. Obtener el valor del gradiente de los pesos entre la capa de ingreso y la oculta
                     for (int i = 0; i < neuronas_c_entrada; ++i)
                         for (int j = 0; j < neuronas_c_oculta; ++j)
-                            gradientes_pesos_entrada_oculta[i][j] = signo_gradiente_capa_oculta[j] * entradas[i];
+                            gradientes_pesos_entrada_oculta[i][j] = gradiente_capa_oculta[j] * entradas[i];
 
                     // 4b. Obtener el gradiente de los umbrales de la capa oculta
                     for (int j = 0; j < neuronas_c_oculta; ++j)
-                        gradientes_umbrales_oculta[j] = signo_gradiente_capa_oculta[j] * 1.0;
+                        gradientes_umbrales_oculta[j] = gradiente_capa_oculta[j] * 1.0;
 
                     // == Con estos valores actualizo los pesos y umbrales de las conexiones de la red ==
 
@@ -459,6 +466,8 @@ namespace IA_MLP
 
     public class Perceptron_e_o_o_s
     {
+        public double[] errores;
+        public double ultimo_error;
         private int neuronas_c_entrada;
         private int neuronas_c_oculta_0;
         private int neuronas_c_oculta_1;
@@ -694,7 +703,7 @@ namespace IA_MLP
                 salida_capa_salida[i] += umbrales_c_salida[i];
 
             double[] salida_final_capa_salida = Sigmoide(salida_capa_salida); //Aplico un afuncion diferente a la de la capa oculta, esto vimos que mejora los resultados
-            Array.Copy(salida_final_capa_salida, salidas_c_salida, softOut.Length);
+            Array.Copy(salida_final_capa_salida, salidas_c_salida, salida_final_capa_salida.Length);
 
             double[] retResult = new double[neuronas_c_salida];
             Array.Copy(salidas_c_salida, retResult, retResult.Length);
@@ -743,9 +752,9 @@ namespace IA_MLP
             double[][] gradientes_pesos_c_entrada_c_oculta_0 = SetearValores(neuronas_c_entrada, neuronas_c_oculta_0, 0.0);
             double[] gradientes_umbrales_oculta_0 = new double[neuronas_c_oculta_0];
 
-            double[] signo_gradiente_salida = new double[neuronas_c_salida];
-            double[] signo_gradiente_c_oculta_1 = new double[neuronas_c_oculta_1];
-            double[] signo_gradiente_c_oculta_0 = new double[neuronas_c_oculta_0];
+            double[] gradiente_salida = new double[neuronas_c_salida];
+            double[] gradiente_c_oculta_1 = new double[neuronas_c_oculta_1];
+            double[] gradiente_c_oculta_0 = new double[neuronas_c_oculta_0];
 
             double[][] delta_valores_previos_pesos_c_entrada_c_oculta_0 = SetearValores(neuronas_c_entrada, neuronas_c_oculta_0, 0.0);
             double[] delta_valores_previos_umbrales_c_oculta_0 = new double[neuronas_c_oculta_0];
@@ -760,7 +769,10 @@ namespace IA_MLP
             double[] valores_entrada = new double[neuronas_c_entrada];
             double[] valores_esperados_salida = new double[neuronas_c_salida];
             double derivada = 0.0;
-            double signo_error = 0.0;
+            double error = 0.0;
+
+            this.errores = new double[corridas_maximas];
+
 
             //establecimos un vector con los indices para mezclarlos y poder correr los entrenamientos de manera aleatoria sobre los datos proporcionados
             int[] secuencia = new int[datos_entrenamiento.Length];
@@ -772,11 +784,12 @@ namespace IA_MLP
             {
                 ++corridas;
 
+                ultimo_error = Error(datos_entrenamiento);
+                errores[corridas - 1] = ultimo_error;
+
                 if (corridas % errInterval == 0 && corridas < corridas_maximas)
                 {
-                    double error = Error(datos_entrenamiento);
-
-                    ErrorEpoca ee = new ErrorEpoca(corridas, error);
+                    ErrorEpoca ee = new ErrorEpoca(corridas, ultimo_error);
                     InformarErrorEpoca?.Invoke(this, ee);
                 }
 
@@ -790,17 +803,17 @@ namespace IA_MLP
 
                     for (int k = 0; k < neuronas_c_salida; ++k)
                     {
-                        signo_error = valores_esperados_salida[k] - salidas_c_salida[k];  // Wikipedia uses (o-t)
-                        derivada = Derivada_sigmoide(salidas_c_salida[k]); // derivada de la funcion de activacion
-                        signo_gradiente_salida[k] = signo_error * derivada;
+                        error = valores_esperados_salida[k] - salidas_c_salida[k];
+                        derivada = Derivada_sigmoide(salidas_c_salida[k]);
+                        gradiente_salida[k] = error * derivada;
                     }
 
                     for (int j = 0; j < neuronas_c_oculta_1; ++j)
                         for (int k = 0; k < neuronas_c_salida; ++k)
-                            gradientes_pesos_c_oculta_1_c_salida[j][k] = signo_gradiente_salida[k] * salidas_c_oculta_1[j];
+                            gradientes_pesos_c_oculta_1_c_salida[j][k] = gradiente_salida[k] * salidas_c_oculta_1[j];
 
                     for (int k = 0; k < neuronas_c_salida; ++k)
-                        gradientes_umbrales_salida[k] = signo_gradiente_salida[k] * 1.0;
+                        gradientes_umbrales_salida[k] = gradiente_salida[k] * 1.0;
 
                     for (int j = 0; j < neuronas_c_oculta_1; ++j)
                     {
@@ -808,35 +821,35 @@ namespace IA_MLP
                         double sum = 0.0;
                         for (int k = 0; k < neuronas_c_salida; ++k)
                         {
-                            sum += signo_gradiente_salida[k] * pesos_c_oculta_1_a_c_salida[j][k];
+                            sum += gradiente_salida[k] * pesos_c_oculta_1_a_c_salida[j][k];
                         }
-                        signo_gradiente_c_oculta_1[j] = derivada * sum;
+                        gradiente_c_oculta_1[j] = derivada * sum;
                     }
 
                     for (int j = 0; j < neuronas_c_oculta_0; ++j)
                         for (int k = 0; k < neuronas_c_oculta_1; ++k)
-                            gradientes_pesos_c_oculta_0_oculta_1[j][k] = signo_gradiente_c_oculta_1[k] * salidas_c_oculta_0[j];
+                            gradientes_pesos_c_oculta_0_oculta_1[j][k] = gradiente_c_oculta_1[k] * salidas_c_oculta_0[j];
 
                     for (int k = 0; k < neuronas_c_salida; ++k)
-                        gradientes_umbrales_oculta_1[k] = signo_gradiente_c_oculta_1[k] * 1.0;
+                        gradientes_umbrales_oculta_1[k] = gradiente_c_oculta_1[k] * 1.0;
 
                     for (int j = 0; j < neuronas_c_oculta_0; ++j)
                     {
                         derivada = DerivadaFuncionActivacion(salidas_c_oculta_1[j]);
-                        double sum = 0.0; // need sums of output signals times hidden-to-output weights
+                        double sum = 0.0; 
                         for (int k = 0; k < neuronas_c_oculta_1; ++k)
                         {
-                            sum += signo_gradiente_c_oculta_1[k] * pesos_c_oculta_0_a_c_oculta_1[j][k];
+                            sum += gradiente_c_oculta_1[k] * pesos_c_oculta_0_a_c_oculta_1[j][k];
                         }
-                        signo_gradiente_c_oculta_0[j] = derivada * sum;
+                        gradiente_c_oculta_0[j] = derivada * sum;
                     }
 
                     for (int i = 0; i < neuronas_c_entrada; ++i)
                         for (int j = 0; j < neuronas_c_oculta_0; ++j)
-                            gradientes_pesos_c_entrada_c_oculta_0[i][j] = signo_gradiente_c_oculta_0[j] * entradas[i];
+                            gradientes_pesos_c_entrada_c_oculta_0[i][j] = gradiente_c_oculta_0[j] * entradas[i];
 
                     for (int j = 0; j < neuronas_c_oculta_0; ++j)
-                        gradientes_umbrales_oculta_0[j] = signo_gradiente_c_oculta_0[j] * 1.0;
+                        gradientes_umbrales_oculta_0[j] = gradiente_c_oculta_0[j] * 1.0;
 
                     for (int i = 0; i < neuronas_c_entrada; ++i)
                     {

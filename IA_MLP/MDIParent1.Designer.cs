@@ -66,21 +66,21 @@
             // entrenarToolStripMenuItem
             // 
             this.entrenarToolStripMenuItem.Name = "entrenarToolStripMenuItem";
-            this.entrenarToolStripMenuItem.Size = new System.Drawing.Size(118, 22);
+            this.entrenarToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.entrenarToolStripMenuItem.Text = "Entrenar";
             this.entrenarToolStripMenuItem.Click += new System.EventHandler(this.entrenarToolStripMenuItem_Click);
             // 
             // probarToolStripMenuItem
             // 
             this.probarToolStripMenuItem.Name = "probarToolStripMenuItem";
-            this.probarToolStripMenuItem.Size = new System.Drawing.Size(118, 22);
+            this.probarToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.probarToolStripMenuItem.Text = "Probar ";
             this.probarToolStripMenuItem.Click += new System.EventHandler(this.probarToolStripMenuItem_Click);
             // 
             // salirToolStripMenuItem
             // 
             this.salirToolStripMenuItem.Name = "salirToolStripMenuItem";
-            this.salirToolStripMenuItem.Size = new System.Drawing.Size(118, 22);
+            this.salirToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.salirToolStripMenuItem.Text = "Salir";
             this.salirToolStripMenuItem.Click += new System.EventHandler(this.salirToolStripMenuItem_Click);
             // 
