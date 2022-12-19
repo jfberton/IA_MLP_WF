@@ -19,6 +19,9 @@ namespace IA_MLP
             cb_topologia.SelectedIndex = 0;
             cb_letra.SelectedIndex = 0;
             cb_distorcion.SelectedIndex = 0;
+
+            label5.Visible = label6.Visible = label7.Visible = label8.Visible = false;
+            lbl_error_global.Visible = lbl_precision.Visible = lbl_letra_original.Visible = lbl_letra_reconocida.Visible = false;
         }
 
         string path_entrenamiento = string.Empty;
@@ -60,7 +63,7 @@ namespace IA_MLP
             }
 
             string data = System.IO.File.ReadAllText(path_entrenamiento).Replace("\r", "");
-            
+
             string[] valores = data.Split('\n');
             List<double> pesos_y_umbrales_list = new List<double>();
             for (int i = 0; i < valores.Length; i++)
@@ -69,7 +72,7 @@ namespace IA_MLP
                     pesos_y_umbrales_list.Add(double.Parse(valores[i]));
             }
             double[] pesos_y_umbrales = pesos_y_umbrales_list.ToArray();
-            
+
             letra_sin_distorcionar = ObtenerValoresLetra(cb_letra.SelectedItem.ToString());
             string distorcion = cb_distorcion.SelectedItem.ToString();
 
@@ -95,19 +98,47 @@ namespace IA_MLP
             }
 
 
+            double[][] salidas_sin_corregir = new double[letras_distorcionadas.Length][];
+            double[][] salidas_corregidas = new double[letras_distorcionadas.Length][];
+            string[] reconocio = new string[letras_distorcionadas.Length];
+            string[] correcto = new string[letras_distorcionadas.Length];
+
+            double error_cuadratico_medio = 0;
+            double error_global = 0;
+            double[] valores_esperados = new double[3];
+
+            switch (cb_letra.SelectedItem.ToString())
+            {
+                case "f":
+                    valores_esperados = new double[] { 1, 0, 0 };
+                    break;
+                case "d":
+                    valores_esperados = new double[] { 0, 1, 0 };
+                    break;
+                case "b":
+                    valores_esperados = new double[] { 0, 0, 1 };
+                    break;
+                default:
+                    break;
+            }
+
+
             if (cantidad_capas_ocultas == 1)
             {
                 Perceptron_e_o_s nn = new Perceptron_e_o_s(100, cantidad_neuronas_capa_oculta_1, 3);
                 nn.CargarPesosyUmbrales(pesos_y_umbrales);
-                double[][] salidas_sin_corregir = new double[letras_distorcionadas.Length][];
-                double[][] salidas_corregidas = new double[letras_distorcionadas.Length][];
-                string[] reconocio = new string[letras_distorcionadas.Length];
-                string[] correcto = new string[letras_distorcionadas.Length];
 
                 for (int i = 0; i < letras_distorcionadas.Length; i++)
                 {
                     salidas_sin_corregir[i] = nn.ProcesarEntradas(letras_distorcionadas[i]);
                     salidas_corregidas[i] = ObtenerResultadoCorregido(salidas_sin_corregir[i]);
+
+                    for (int j = 0; j < nn.neuronas_c_salida; ++j)
+                    {
+                        double err = valores_esperados[j] - salidas_sin_corregir[i][j];
+                        error_cuadratico_medio += (err * err) / 2;
+                    }
+
                     if (salidas_corregidas[i][0] == 1)
                     {
                         reconocio[i] = "f";
@@ -148,15 +179,19 @@ namespace IA_MLP
             {
                 Perceptron_e_o_o_s nn = new Perceptron_e_o_o_s(100, cantidad_neuronas_capa_oculta_1, cantidad_neuronas_capa_oculta_2, 3);
                 nn.CargarPesosyUmbrales(pesos_y_umbrales);
-                double[][] salidas_sin_corregir = new double[letras_distorcionadas.Length][];
-                double[][] salidas_corregidas = new double[letras_distorcionadas.Length][];
-                string[] reconocio = new string[letras_distorcionadas.Length];
-                string[] correcto = new string[letras_distorcionadas.Length];
-
+                
                 for (int i = 0; i < letras_distorcionadas.Length; i++)
                 {
                     salidas_sin_corregir[i] = nn.ProcesarEntradas(letras_distorcionadas[i]);
                     salidas_corregidas[i] = ObtenerResultadoCorregido(salidas_sin_corregir[i]);
+
+                    for (int j = 0; j < nn.neuronas_c_salida; ++j)
+                    {
+                        double err = valores_esperados[j] - salidas_sin_corregir[i][j];
+                        error_cuadratico_medio += (err * err) / 2;
+                    }
+
+
                     if (salidas_corregidas[i][0] == 1)
                     {
                         reconocio[i] = "f";
@@ -180,6 +215,8 @@ namespace IA_MLP
                     }
                 }
 
+                
+
                 dataGridView1.Rows.Clear();
                 for (int i = 0; i < letras_distorcionadas.Length; i++)
                 {
@@ -193,6 +230,16 @@ namespace IA_MLP
                                 , salidas_sin_corregir[i][2].ToString());
                 }
             }
+
+            error_global = error_cuadratico_medio / letras_distorcionadas.Length;
+
+            lbl_letra_original.Text = cb_letra.SelectedItem.ToString();
+            lbl_letra_reconocida.Text = reconocio[0];
+            lbl_error_global.Text = error_global.ToString("#0.00%");
+            lbl_precision.Text = (correcto.Count(c => c == "Si") * 1.0 / letras_distorcionadas.Length).ToString("#0.00%");
+
+            label5.Visible = label6.Visible = label7.Visible = label8.Visible = true;
+            lbl_error_global.Visible = lbl_precision.Visible = lbl_letra_original.Visible = lbl_letra_reconocida.Visible = true;
         }
 
         private double[] ObtenerResultadoCorregido(double[] resultadosDouble)
@@ -206,7 +253,7 @@ namespace IA_MLP
                 {
                     valorMaximo = resultadosDouble[i];
                     indiceMaximo = i;
-                }    
+                }
             }
 
             ret[indiceMaximo] = 1;
@@ -218,11 +265,11 @@ namespace IA_MLP
             Random rnd = new Random(1);
             int[] cambiar_valor;
 
-            double[][] letras_distorcionadas = new double[cantidad_distorciones_solicitadas][] ;
+            double[][] letras_distorcionadas = new double[cantidad_distorciones_solicitadas][];
             for (int i = 0; i < cantidad_distorciones_solicitadas; i++)
             {
                 //obtengo la letra sin distorcionar
-                
+
                 double[] letra_distorcionada = new double[letra_sin_distorcionar.Length];
                 Array.Copy(letra_sin_distorcionar, letra_distorcionada, letra_sin_distorcionar.Length);
                 int valores_cargados = 0;
@@ -300,6 +347,7 @@ namespace IA_MLP
         {
             if (letras_distorcionadas != null && letras_distorcionadas.Length >= e.RowIndex)
             {
+                lbl_letra_reconocida.Text = dataGridView1[2, e.RowIndex].Value.ToString();
                 MostrarLetra(letras_distorcionadas[e.RowIndex]);
             }
 
@@ -313,7 +361,7 @@ namespace IA_MLP
                 if (index != -1)
                 {
                     PictureBox pb = (PictureBox)panel4.Controls[index];
-                    pb.BackColor = letra[i-1] == 0 ? Color.White : Color.Black;
+                    pb.BackColor = letra[i - 1] == 0 ? Color.White : Color.Black;
                 }
             }
 

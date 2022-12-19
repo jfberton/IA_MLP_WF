@@ -30,9 +30,24 @@
         {
             this.panel1 = new System.Windows.Forms.Panel();
             this.panel4 = new System.Windows.Forms.Panel();
+            this.lbl_error_global = new System.Windows.Forms.Label();
+            this.lbl_precision = new System.Windows.Forms.Label();
+            this.lbl_letra_reconocida = new System.Windows.Forms.Label();
+            this.lbl_letra_original = new System.Windows.Forms.Label();
+            this.label8 = new System.Windows.Forms.Label();
+            this.label7 = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
             this.letra1 = new IA_MLP.Letra();
             this.panel3 = new System.Windows.Forms.Panel();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
+            this.LetraColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.letra_enviada_column = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ResultadoReconocimientoColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ReconocioColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.salidaNeurona1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.salidaNeurona2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.salidaNeurona3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.panel2 = new System.Windows.Forms.Panel();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
@@ -43,13 +58,6 @@
             this.cb_letra = new System.Windows.Forms.ComboBox();
             this.cb_distorcion = new System.Windows.Forms.ComboBox();
             this.button1 = new System.Windows.Forms.Button();
-            this.LetraColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.letra_enviada_column = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ResultadoReconocimientoColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ReconocioColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.salidaNeurona1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.salidaNeurona2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.salidaNeurona3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.panel1.SuspendLayout();
             this.panel4.SuspendLayout();
             this.panel3.SuspendLayout();
@@ -69,12 +77,100 @@
             // 
             // panel4
             // 
+            this.panel4.Controls.Add(this.lbl_error_global);
+            this.panel4.Controls.Add(this.lbl_precision);
+            this.panel4.Controls.Add(this.lbl_letra_reconocida);
+            this.panel4.Controls.Add(this.lbl_letra_original);
+            this.panel4.Controls.Add(this.label8);
+            this.panel4.Controls.Add(this.label7);
+            this.panel4.Controls.Add(this.label6);
+            this.panel4.Controls.Add(this.label5);
             this.panel4.Controls.Add(this.letra1);
             this.panel4.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel4.Location = new System.Drawing.Point(0, 268);
             this.panel4.Name = "panel4";
             this.panel4.Size = new System.Drawing.Size(539, 166);
             this.panel4.TabIndex = 2;
+            // 
+            // lbl_error_global
+            // 
+            this.lbl_error_global.AutoSize = true;
+            this.lbl_error_global.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.lbl_error_global.Location = new System.Drawing.Point(345, 121);
+            this.lbl_error_global.Name = "lbl_error_global";
+            this.lbl_error_global.Size = new System.Drawing.Size(112, 21);
+            this.lbl_error_global.TabIndex = 13;
+            this.lbl_error_global.Text = "Letra original";
+            // 
+            // lbl_precision
+            // 
+            this.lbl_precision.AutoSize = true;
+            this.lbl_precision.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.lbl_precision.Location = new System.Drawing.Point(345, 86);
+            this.lbl_precision.Name = "lbl_precision";
+            this.lbl_precision.Size = new System.Drawing.Size(112, 21);
+            this.lbl_precision.TabIndex = 13;
+            this.lbl_precision.Text = "Letra original";
+            // 
+            // lbl_letra_reconocida
+            // 
+            this.lbl_letra_reconocida.AutoSize = true;
+            this.lbl_letra_reconocida.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.lbl_letra_reconocida.Location = new System.Drawing.Point(345, 51);
+            this.lbl_letra_reconocida.Name = "lbl_letra_reconocida";
+            this.lbl_letra_reconocida.Size = new System.Drawing.Size(112, 21);
+            this.lbl_letra_reconocida.TabIndex = 13;
+            this.lbl_letra_reconocida.Text = "Letra original";
+            // 
+            // lbl_letra_original
+            // 
+            this.lbl_letra_original.AutoSize = true;
+            this.lbl_letra_original.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.lbl_letra_original.Location = new System.Drawing.Point(345, 16);
+            this.lbl_letra_original.Name = "lbl_letra_original";
+            this.lbl_letra_original.Size = new System.Drawing.Size(112, 21);
+            this.lbl_letra_original.TabIndex = 13;
+            this.lbl_letra_original.Text = "Letra original";
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.label8.Location = new System.Drawing.Point(191, 16);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(112, 21);
+            this.label8.TabIndex = 13;
+            this.label8.Text = "Letra original";
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.label7.Location = new System.Drawing.Point(191, 51);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(137, 21);
+            this.label7.TabIndex = 12;
+            this.label7.Text = "Letra reconocida";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.label6.Location = new System.Drawing.Point(191, 121);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(100, 21);
+            this.label6.TabIndex = 11;
+            this.label6.Text = "Error global";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.label5.Location = new System.Drawing.Point(191, 86);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(80, 21);
+            this.label5.TabIndex = 10;
+            this.label5.Text = "Precisión";
             // 
             // letra1
             // 
@@ -113,6 +209,50 @@
             this.dataGridView1.Size = new System.Drawing.Size(539, 234);
             this.dataGridView1.TabIndex = 0;
             this.dataGridView1.CellEnter += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellEnter);
+            // 
+            // LetraColumn
+            // 
+            this.LetraColumn.HeaderText = "Nro";
+            this.LetraColumn.Name = "LetraColumn";
+            this.LetraColumn.ReadOnly = true;
+            this.LetraColumn.Width = 50;
+            // 
+            // letra_enviada_column
+            // 
+            this.letra_enviada_column.HeaderText = "Letra enviada";
+            this.letra_enviada_column.Name = "letra_enviada_column";
+            this.letra_enviada_column.ReadOnly = true;
+            // 
+            // ResultadoReconocimientoColumn
+            // 
+            this.ResultadoReconocimientoColumn.HeaderText = "Letra reconocida";
+            this.ResultadoReconocimientoColumn.Name = "ResultadoReconocimientoColumn";
+            this.ResultadoReconocimientoColumn.ReadOnly = true;
+            this.ResultadoReconocimientoColumn.Width = 150;
+            // 
+            // ReconocioColumn
+            // 
+            this.ReconocioColumn.HeaderText = "Reconoció";
+            this.ReconocioColumn.Name = "ReconocioColumn";
+            this.ReconocioColumn.ReadOnly = true;
+            // 
+            // salidaNeurona1
+            // 
+            this.salidaNeurona1.HeaderText = "Salida Neurona 1";
+            this.salidaNeurona1.Name = "salidaNeurona1";
+            this.salidaNeurona1.ReadOnly = true;
+            // 
+            // salidaNeurona2
+            // 
+            this.salidaNeurona2.HeaderText = "Salida Neurona 2";
+            this.salidaNeurona2.Name = "salidaNeurona2";
+            this.salidaNeurona2.ReadOnly = true;
+            // 
+            // salidaNeurona3
+            // 
+            this.salidaNeurona3.HeaderText = "Salida Neurona 3";
+            this.salidaNeurona3.Name = "salidaNeurona3";
+            this.salidaNeurona3.ReadOnly = true;
             // 
             // panel2
             // 
@@ -245,50 +385,6 @@
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
-            // LetraColumn
-            // 
-            this.LetraColumn.HeaderText = "Nro";
-            this.LetraColumn.Name = "LetraColumn";
-            this.LetraColumn.ReadOnly = true;
-            this.LetraColumn.Width = 50;
-            // 
-            // letra_enviada_column
-            // 
-            this.letra_enviada_column.HeaderText = "Letra enviada";
-            this.letra_enviada_column.Name = "letra_enviada_column";
-            this.letra_enviada_column.ReadOnly = true;
-            // 
-            // ResultadoReconocimientoColumn
-            // 
-            this.ResultadoReconocimientoColumn.HeaderText = "Letra reconocida";
-            this.ResultadoReconocimientoColumn.Name = "ResultadoReconocimientoColumn";
-            this.ResultadoReconocimientoColumn.ReadOnly = true;
-            this.ResultadoReconocimientoColumn.Width = 150;
-            // 
-            // ReconocioColumn
-            // 
-            this.ReconocioColumn.HeaderText = "Reconoció";
-            this.ReconocioColumn.Name = "ReconocioColumn";
-            this.ReconocioColumn.ReadOnly = true;
-            // 
-            // salidaNeurona1
-            // 
-            this.salidaNeurona1.HeaderText = "Salida Neurona 1";
-            this.salidaNeurona1.Name = "salidaNeurona1";
-            this.salidaNeurona1.ReadOnly = true;
-            // 
-            // salidaNeurona2
-            // 
-            this.salidaNeurona2.HeaderText = "Salida Neurona 2";
-            this.salidaNeurona2.Name = "salidaNeurona2";
-            this.salidaNeurona2.ReadOnly = true;
-            // 
-            // salidaNeurona3
-            // 
-            this.salidaNeurona3.HeaderText = "Salida Neurona 3";
-            this.salidaNeurona3.Name = "salidaNeurona3";
-            this.salidaNeurona3.ReadOnly = true;
-            // 
             // Form2
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -308,6 +404,7 @@
             this.Text = "Form2";
             this.panel1.ResumeLayout(false);
             this.panel4.ResumeLayout(false);
+            this.panel4.PerformLayout();
             this.panel3.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             this.ResumeLayout(false);
@@ -340,5 +437,13 @@
         private DataGridViewTextBoxColumn salidaNeurona1;
         private DataGridViewTextBoxColumn salidaNeurona2;
         private DataGridViewTextBoxColumn salidaNeurona3;
+        private Label lbl_error_global;
+        private Label lbl_precision;
+        private Label lbl_letra_reconocida;
+        private Label lbl_letra_original;
+        private Label label8;
+        private Label label7;
+        private Label label6;
+        private Label label5;
     }
 }

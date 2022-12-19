@@ -12,7 +12,7 @@ namespace IA_MLP
         public double ultimo_error;
         private int neuronas_c_entrada;
         private int neuronas_c_oculta;
-        private int neuronas_c_salida;
+        public int neuronas_c_salida;
 
         private double[] entradas;
 
@@ -406,7 +406,7 @@ namespace IA_MLP
                 for (int j = 0; j < neuronas_c_salida; ++j)
                 {
                     double err = valores_esperados[j] - yValues[j];
-                    suma_de_errores_al_cuadrado += err * err;
+                    suma_de_errores_al_cuadrado += (err * err)/2;
                 }
             }
             return suma_de_errores_al_cuadrado / datos_entrenamiento.Length;
@@ -471,7 +471,7 @@ namespace IA_MLP
         private int neuronas_c_entrada;
         private int neuronas_c_oculta_0;
         private int neuronas_c_oculta_1;
-        private int neuronas_c_salida;
+        public int neuronas_c_salida;
 
         private double[] entradas;
 
@@ -941,7 +941,7 @@ namespace IA_MLP
                 for (int j = 0; j < neuronas_c_salida; ++j)
                 {
                     double err = valores_esperados[j] - yValues[j];
-                    suma_de_errores_al_cuadrado += err * err;
+                    suma_de_errores_al_cuadrado += (err * err)/2;
                 }
             }
             return suma_de_errores_al_cuadrado / datos_entrenamiento.Length;

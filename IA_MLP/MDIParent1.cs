@@ -57,6 +57,5 @@ namespace IA_MLP
         {
             this.Close();
         }
-
     }
 }

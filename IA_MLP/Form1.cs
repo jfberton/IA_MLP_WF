@@ -572,14 +572,14 @@ namespace IA_MLP
             {
                 if (formulario.Text == "Evolución del error")
                 {
-                    ((Grafico_Evolucion)formulario).ValoresError = errores;
-                    ((Grafico_Evolucion)formulario).ActualizarGrafico();
+                    ((grafico_error)formulario).ValoresError = errores;
+                    ((grafico_error)formulario).ActualizarGrafico();
                     formulario.Activate();
                     return;
                 }
             }
 
-            Grafico_Evolucion childForm = new Grafico_Evolucion();
+            grafico_error childForm = new grafico_error();
             childForm.ValoresError = errores;
             childForm.ActualizarGrafico();
             childForm.MdiParent = this.MdiParent;
