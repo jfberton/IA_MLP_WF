@@ -170,9 +170,10 @@ namespace IA_MLP
                                 , cb_letra.SelectedItem.ToString()
                                 , reconocio[i]
                                 , correcto[i]
-                                , salidas_sin_corregir[i][0].ToString()
-                                , salidas_sin_corregir[i][1].ToString()
-                                , salidas_sin_corregir[i][2].ToString());
+                                , (Math.Round(salidas_sin_corregir[i][0], 4) * 100).ToString() +'%'
+                                , (Math.Round(salidas_sin_corregir[i][1], 4) * 100).ToString() +'%'
+                                , (Math.Round(salidas_sin_corregir[i][2], 4) * 100).ToString()+'%'
+                                );
                 }
             }
             else
@@ -225,9 +226,10 @@ namespace IA_MLP
                                 , cb_letra.SelectedItem.ToString()
                                 , reconocio[i]
                                 , correcto[i]
-                                , salidas_sin_corregir[i][0].ToString()
-                                , salidas_sin_corregir[i][1].ToString()
-                                , salidas_sin_corregir[i][2].ToString());
+                                , (Math.Round(salidas_sin_corregir[i][0], 4) * 100).ToString() + '%'
+                                , (Math.Round(salidas_sin_corregir[i][1], 4) * 100).ToString() + '%'
+                                , (Math.Round(salidas_sin_corregir[i][2], 4) * 100).ToString() + '%'
+                                );
                 }
             }
 
@@ -235,11 +237,12 @@ namespace IA_MLP
 
             lbl_letra_original.Text = cb_letra.SelectedItem.ToString();
             lbl_letra_reconocida.Text = reconocio[0];
-            lbl_error_global.Text = error_global.ToString("#0.00%");
+            //lbl_error_global.Text = error_global.ToString("#0.00%");
             lbl_precision.Text = (correcto.Count(c => c == "Si") * 1.0 / letras_distorcionadas.Length).ToString("#0.00%");
 
             label5.Visible = label6.Visible = label7.Visible = label8.Visible = true;
-            lbl_error_global.Visible = lbl_precision.Visible = lbl_letra_original.Visible = lbl_letra_reconocida.Visible = true;
+            lbl_error_global.Visible = false;
+            lbl_precision.Visible = lbl_letra_original.Visible = lbl_letra_reconocida.Visible = true;
         }
 
         private double[] ObtenerResultadoCorregido(double[] resultadosDouble)
@@ -366,6 +369,21 @@ namespace IA_MLP
             }
 
             letra1.MostrarLetra(letra, cb_letra.SelectedItem.ToString(), porcentaje_distorcion);
+        }
+
+        private void label6_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void lbl_error_global_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+
         }
     }
 }

@@ -398,13 +398,13 @@ namespace IA_MLP
                 AgregarMostrarLineasBW1(new List<string>() { ShowVector(pesos_y_umbrales, 4, 10, true) });
                 
                 double error = nn.ultimo_error;
-                AgregarMostrarLineasBW1(new List<string>() { string.Format("Error final sobre datos de entrenamiento = {0}", error.ToString("%#0.00")) });
+                AgregarMostrarLineasBW1(new List<string>() { string.Format("Error final sobre datos de entrenamiento = {0}", error.ToString("#0.00%")) });
                 
                 double trainAcc = nn.Precision(trainData);
-                AgregarMostrarLineasBW1(new List<string>() { string.Format("Precisión final sobre datos de entrenamiento = {0}", trainAcc.ToString("%#0.00")) });
+                AgregarMostrarLineasBW1(new List<string>() { string.Format("Precisión final sobre datos de entrenamiento = {0}", trainAcc.ToString("#0.00%")) });
 
                 double testAcc = nn.Precision(testData);
-                AgregarMostrarLineasBW1(new List<string>() { string.Format("Precisión final sobre datos de prueba = {0}", testAcc.ToString("%#0.00")) });
+                AgregarMostrarLineasBW1(new List<string>() { string.Format("Precisión final sobre datos de prueba = {0}", testAcc.ToString("#0.00%")) });
 
                 AgregarMostrarLineasBW1(new List<string>() { "Final del programa de entrenamiento" }, true);
 
@@ -517,13 +517,13 @@ namespace IA_MLP
                 AgregarMostrarLineasBW2(new List<string>() { ShowVector(pesos_y_umbrales, 4, 10, true) });
 
                 double error = nn.ultimo_error;
-                AgregarMostrarLineasBW2(new List<string>() { string.Format("Error final sobre datos de entrenamiento = {0}", error.ToString("%#0.00")) });
+                AgregarMostrarLineasBW2(new List<string>() { string.Format("Error final sobre datos de entrenamiento = {0}", error.ToString("#0.00%")) });
 
                 double trainAcc = nn.Precision(trainData);
-                AgregarMostrarLineasBW2(new List<string>() { string.Format("Precisión final sobre datos de entrenamiento = {0}", trainAcc.ToString("%#0.00")) });
+                AgregarMostrarLineasBW2(new List<string>() { string.Format("Precisión final sobre datos de entrenamiento = {0}", trainAcc.ToString("#0.00%")) });
 
                 double testAcc = nn.Precision(testData);
-                AgregarMostrarLineasBW2(new List<string>() { string.Format("Precisión final sobre datos de prueba = {0}", testAcc.ToString("%#0.00")) });
+                AgregarMostrarLineasBW2(new List<string>() { string.Format("Precisión final sobre datos de prueba = {0}", testAcc.ToString("#0.00%")) });
 
                 AgregarMostrarLineasBW2(new List<string>() { "Final del programa de entrenamiento" }, true);
 

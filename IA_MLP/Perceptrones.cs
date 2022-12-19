@@ -80,7 +80,7 @@ namespace IA_MLP
             double[] vector_pesos_umbrales = new double[tamaño_ventor_pesos];
             
             for (int i = 0; i < vector_pesos_umbrales.Length; ++i)
-                vector_pesos_umbrales[i] = (0.001 - 0.0001) * rnd.NextDouble() + 0.0001;
+                vector_pesos_umbrales[i] = (2 * rnd.NextDouble()) - 1;
             
             this.CargarPesosyUmbrales(vector_pesos_umbrales);
         }
@@ -337,9 +337,17 @@ namespace IA_MLP
                         for (int j = 0; j < neuronas_c_oculta; ++j)
                         {
                             double delta = gradientes_pesos_entrada_oculta[i][j] * tasa_de_aprendizaje;
+
+                            double restaMomento;
+                            if (ii > 1)
+                                restaMomento = (pesos_c_entrada_a_c_oculta[i][j] - delta_valores_previos_pesos_entrada_oculta[i][j]);
+                            else
+                                restaMomento = 0;
+
+                            delta_valores_previos_pesos_entrada_oculta[i][j] = pesos_c_entrada_a_c_oculta[i][j];
+
                             pesos_c_entrada_a_c_oculta[i][j] += delta;
-                            pesos_c_entrada_a_c_oculta[i][j] += delta_valores_previos_pesos_entrada_oculta[i][j] * momento;
-                            delta_valores_previos_pesos_entrada_oculta[i][j] = delta;
+                            pesos_c_entrada_a_c_oculta[i][j] += restaMomento * momento;
                         }
                     }
 
@@ -347,9 +355,17 @@ namespace IA_MLP
                     for (int j = 0; j < neuronas_c_oculta; ++j)
                     {
                         double delta = gradientes_umbrales_oculta[j] * tasa_de_aprendizaje;
+
+                        double restaMomento;
+                        if (ii > 1)
+                            restaMomento = (umbrales_c_oculta[j] - delta_valores_previos_umbrales_oculta[j]);
+                        else
+                            restaMomento = 0;
+
+                        delta_valores_previos_umbrales_oculta[j] = umbrales_c_oculta[j];
+                     
                         umbrales_c_oculta[j] += delta;
-                        umbrales_c_oculta[j] += delta_valores_previos_umbrales_oculta[j] * momento;
-                        delta_valores_previos_umbrales_oculta[j] = delta;
+                        umbrales_c_oculta[j] += restaMomento * momento;
                     }
 
                     // Actualizo los pesos de las conexiones entre la capa oculta y la de salida
@@ -358,9 +374,16 @@ namespace IA_MLP
                         for (int k = 0; k < neuronas_c_salida; ++k)
                         {
                             double delta = gradientes_pesos_oculta_salida[j][k] * tasa_de_aprendizaje;
+
+                            double restaMomento = 0.0;
+                            if (ii > 1)
+                                restaMomento = (pesos_c_oculta_a_c_salida[j][k] - delta_valores_previos_pesos_oculta_salida[j][k]);
+                            else
+                                restaMomento = 0;
+                            delta_valores_previos_pesos_oculta_salida[j][k] = pesos_c_oculta_a_c_salida[j][k];
+
                             pesos_c_oculta_a_c_salida[j][k] += delta;
-                            pesos_c_oculta_a_c_salida[j][k] += delta_valores_previos_pesos_oculta_salida[j][k] * momento;
-                            delta_valores_previos_pesos_oculta_salida[j][k] = delta;
+                            pesos_c_oculta_a_c_salida[j][k] += restaMomento * momento;
                         }
                     }
 
@@ -368,9 +391,17 @@ namespace IA_MLP
                     for (int k = 0; k < neuronas_c_salida; ++k)
                     {
                         double delta = gradientes_umbrales_salida[k] * tasa_de_aprendizaje;
+
+                        double restaMomento;
+                        if (ii > 1)
+                            restaMomento = (umbrales_c_salida[k] - delta_valores_previos_umbrales_salida[k]);
+                        else
+                            restaMomento = 0;
+
+                        delta_valores_previos_umbrales_salida[k] = umbrales_c_salida[k];
+
                         umbrales_c_salida[k] += delta;
-                        umbrales_c_salida[k] += delta_valores_previos_umbrales_salida[k] * momento;
-                        delta_valores_previos_umbrales_salida[k] = delta;
+                        umbrales_c_salida[k] += restaMomento * momento;
                     }
 
                 } // por cada item de entrenamiento
@@ -553,7 +584,7 @@ namespace IA_MLP
             double[] vector_pesos_umbrales = new double[obtener_tamaño_vector_pesos_y_umbrales()];
 
             for (int i = 0; i < vector_pesos_umbrales.Length; ++i)
-                vector_pesos_umbrales[i] = (0.001 - 0.0001) * rnd.NextDouble() + 0.0001;
+                vector_pesos_umbrales[i] = (2 * rnd.NextDouble()) - 1;
             this.CargarPesosyUmbrales(vector_pesos_umbrales);
         }
 
@@ -717,7 +748,7 @@ namespace IA_MLP
         /// <returns></returns>
         private static double FuncionDeActivacion(double x)
         {
-            return x;
+            return x*0.5;
         }
 
         private static double DerivadaFuncionActivacion(double x)
@@ -799,6 +830,7 @@ namespace IA_MLP
                     int idx = secuencia[ii];
                     Array.Copy(datos_entrenamiento[idx], valores_entrada, neuronas_c_entrada);
                     Array.Copy(datos_entrenamiento[idx], neuronas_c_entrada, valores_esperados_salida, 0, neuronas_c_salida);
+
                     ProcesarEntradas(valores_entrada);
 
                     for (int k = 0; k < neuronas_c_salida; ++k)
@@ -856,18 +888,34 @@ namespace IA_MLP
                         for (int j = 0; j < neuronas_c_oculta_0; ++j)
                         {
                             double delta = gradientes_pesos_c_entrada_c_oculta_0[i][j] * tasa_de_aprendizaje;
+
+                            double restaMomento;
+                            if (ii > 1)
+                                restaMomento = (pesos_c_entrada_a_c_oculta_0[i][j] - delta_valores_previos_pesos_c_entrada_c_oculta_0[i][j]);
+                            else
+                                restaMomento = 0;
+
+                            delta_valores_previos_pesos_c_entrada_c_oculta_0[i][j] = pesos_c_entrada_a_c_oculta_0[i][j];
+
                             pesos_c_entrada_a_c_oculta_0[i][j] += delta;
-                            pesos_c_entrada_a_c_oculta_0[i][j] += delta_valores_previos_pesos_c_entrada_c_oculta_0[i][j] * momento;
-                            delta_valores_previos_pesos_c_entrada_c_oculta_0[i][j] = delta;
+                            pesos_c_entrada_a_c_oculta_0[i][j] += restaMomento * momento;
                         }
                     }
 
                     for (int j = 0; j < neuronas_c_oculta_0; ++j)
                     {
                         double delta = gradientes_umbrales_oculta_0[j] * tasa_de_aprendizaje;
+
+                        double restaMomento;
+                        if (ii > 1)
+                            restaMomento = (umbrales_c_oculta_0[j] - delta_valores_previos_umbrales_c_oculta_0[j]);
+                        else
+                            restaMomento = 0;
+
+                        delta_valores_previos_umbrales_c_oculta_0[j] = umbrales_c_oculta_0[j];
+
                         umbrales_c_oculta_0[j] += delta;
-                        umbrales_c_oculta_0[j] += delta_valores_previos_umbrales_c_oculta_0[j] * momento;
-                        delta_valores_previos_umbrales_c_oculta_0[j] = delta;
+                        umbrales_c_oculta_0[j] += restaMomento * momento;
                     }
 
                     for (int i = 0; i < neuronas_c_oculta_0; ++i)
@@ -875,18 +923,34 @@ namespace IA_MLP
                         for (int j = 0; j < neuronas_c_oculta_1; ++j)
                         {
                             double delta = gradientes_pesos_c_oculta_0_oculta_1[i][j] * tasa_de_aprendizaje;
+
+                            double restaMomento;
+                            if (ii > 1)
+                                restaMomento = (pesos_c_oculta_0_a_c_oculta_1[i][j] - delta_valores_previos_pesos_c_oculta_0_c_oculta_1[i][j]);
+                            else
+                                restaMomento = 0;
+
+                            delta_valores_previos_pesos_c_oculta_0_c_oculta_1[i][j] = pesos_c_oculta_0_a_c_oculta_1[i][j];
+
                             pesos_c_oculta_0_a_c_oculta_1[i][j] += delta;
-                            pesos_c_oculta_0_a_c_oculta_1[i][j] += delta_valores_previos_pesos_c_oculta_0_c_oculta_1[i][j] * momento;
-                            delta_valores_previos_pesos_c_oculta_0_c_oculta_1[i][j] = delta;
+                            pesos_c_oculta_0_a_c_oculta_1[i][j] += restaMomento * momento;
                         }
                     }
 
                     for (int j = 0; j < neuronas_c_oculta_1; ++j)
                     {
                         double delta = gradientes_umbrales_oculta_1[j] * tasa_de_aprendizaje;
+
+                        double restaMomento;
+                        if (ii > 1)
+                            restaMomento = (umbrales_c_oculta_1[j] - delta_valores_previos_umbrales_c_oculta_1[j]);
+                        else
+                            restaMomento = 0;
+
+                        delta_valores_previos_umbrales_c_oculta_1[j] = umbrales_c_oculta_1[j];
+
                         umbrales_c_oculta_1[j] += delta;
-                        umbrales_c_oculta_1[j] += delta_valores_previos_umbrales_c_oculta_1[j] * momento;
-                        delta_valores_previos_umbrales_c_oculta_1[j] = delta;
+                        umbrales_c_oculta_1[j] += restaMomento * momento;
                     }
 
                     for (int j = 0; j < neuronas_c_oculta_0; ++j)
@@ -894,18 +958,34 @@ namespace IA_MLP
                         for (int k = 0; k < neuronas_c_salida; ++k)
                         {
                             double delta = gradientes_pesos_c_oculta_1_c_salida[j][k] * tasa_de_aprendizaje;
+
+                            double restaMomento;
+                            if (ii > 1)
+                                restaMomento = (pesos_c_oculta_1_a_c_salida[j][k] - delta_valores_previos_pesos_oculta_1_c_salida[j][k]);
+                            else
+                                restaMomento = 0;
+
+                            delta_valores_previos_pesos_oculta_1_c_salida[j][k] = pesos_c_oculta_1_a_c_salida[j][k];
+
                             pesos_c_oculta_1_a_c_salida[j][k] += delta;
-                            pesos_c_oculta_1_a_c_salida[j][k] += delta_valores_previos_pesos_oculta_1_c_salida[j][k] * momento;
-                            delta_valores_previos_pesos_oculta_1_c_salida[j][k] = delta;
+                            pesos_c_oculta_1_a_c_salida[j][k] += restaMomento * momento;
                         }
                     }
 
                     for (int k = 0; k < neuronas_c_salida; ++k)
                     {
                         double delta = gradientes_umbrales_salida[k] * tasa_de_aprendizaje;
+
+                        double restaMomento;
+                        if (ii > 1)
+                            restaMomento = (umbrales_c_salida[k] - delta_valores_previos_umbrales_c_salida[k]);
+                        else
+                            restaMomento = 0;
+
+                        delta_valores_previos_umbrales_c_salida[k] = umbrales_c_salida[k];
+
                         umbrales_c_salida[k] += delta;
-                        umbrales_c_salida[k] += delta_valores_previos_umbrales_c_salida[k] * momento;
-                        delta_valores_previos_umbrales_c_salida[k] = delta;
+                        umbrales_c_salida[k] += restaMomento * momento;
                     }
 
                 } // por cada item de entrenamiento

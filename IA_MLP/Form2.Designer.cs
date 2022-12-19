@@ -101,6 +101,7 @@
             this.lbl_error_global.Size = new System.Drawing.Size(112, 21);
             this.lbl_error_global.TabIndex = 13;
             this.lbl_error_global.Text = "Letra original";
+            this.lbl_error_global.Click += new System.EventHandler(this.lbl_error_global_Click);
             // 
             // lbl_precision
             // 
@@ -161,6 +162,7 @@
             this.label6.Size = new System.Drawing.Size(100, 21);
             this.label6.TabIndex = 11;
             this.label6.Text = "Error global";
+            this.label6.Click += new System.EventHandler(this.label6_Click);
             // 
             // label5
             // 
@@ -208,6 +210,7 @@
             this.dataGridView1.RowTemplate.Height = 25;
             this.dataGridView1.Size = new System.Drawing.Size(539, 234);
             this.dataGridView1.TabIndex = 0;
+            this.dataGridView1.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellContentClick);
             this.dataGridView1.CellEnter += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellEnter);
             // 
             // LetraColumn
