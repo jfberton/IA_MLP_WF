@@ -34,7 +34,6 @@ namespace IA_MLP
             chart1.BorderlineWidth = 2;
             chart1.BorderSkin.SkinStyle = System.Windows.Forms.DataVisualization.Charting.BorderSkinStyle.Emboss;
 
-
             chartArea1.Area3DStyle.Inclination = 40;
             chartArea1.Area3DStyle.IsClustered = true;
             chartArea1.Area3DStyle.IsRightAngleAxes = false;
@@ -55,6 +54,7 @@ namespace IA_MLP
             chartArea1.BorderDashStyle = System.Windows.Forms.DataVisualization.Charting.ChartDashStyle.Solid;
             chartArea1.Name = "Default";
             chartArea1.ShadowColor = System.Drawing.Color.Transparent;
+            chartArea1.AxisY.Maximum = 1;
             chart1.ChartAreas.Add(chartArea1);
             
             legend1.BackColor = System.Drawing.Color.Transparent;
