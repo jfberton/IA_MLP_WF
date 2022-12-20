@@ -58,6 +58,8 @@ namespace IA_MLP
             chartArea1.Name = "Default";
             chartArea1.ShadowColor = System.Drawing.Color.Transparent;
             chartArea1.AxisY.Maximum = 1;
+            chartArea1.AxisX.Title = "Épocas";
+            chartArea1.AxisY.Title = "Precisión";
             chart1.ChartAreas.Add(chartArea1);
             
             legend1.BackColor = System.Drawing.Color.Transparent;
@@ -69,19 +71,24 @@ namespace IA_MLP
             chart1.Legends.Add(legend1);
             chart1.Location = new System.Drawing.Point(16, 32);
             chart1.Name = "chart1";
+
+            
+
             series1.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(180)))), ((int)(((byte)(26)))), ((int)(((byte)(59)))), ((int)(((byte)(105)))));
             series1.BorderWidth = 3;
             series1.ChartArea = "Default";
             series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
             series1.Color = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(65)))), ((int)(((byte)(140)))), ((int)(((byte)(240)))));
             series1.Legend = "Default";
+
             series1.MarkerSize = 8;
             series1.MarkerStyle = System.Windows.Forms.DataVisualization.Charting.MarkerStyle.None;
-            series1.Name = "Series1";
+            
             series1.ShadowColor = System.Drawing.Color.Black;
             series1.ShadowOffset = 2;
             series1.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Double;
             series1.YValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Double;
+            series1.Name = "Error de Entrenamiento";
 
             series2.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(180)))), ((int)(((byte)(26)))), ((int)(((byte)(59)))), ((int)(((byte)(105)))));
             series2.BorderWidth = 3;
@@ -91,11 +98,12 @@ namespace IA_MLP
             series2.Legend = "Default";
             series2.MarkerSize = 8;
             series2.MarkerStyle = System.Windows.Forms.DataVisualization.Charting.MarkerStyle.None;
-            series2.Name = "Series2";
+            
             series2.ShadowColor = System.Drawing.Color.Black;
             series2.ShadowOffset = 2;
             series2.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Double;
             series2.YValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Double;
+            series2.Name = "Error de Validacion";
 
             chart1.Series.Add(series1);
             chart1.Series.Add(series2);
@@ -110,8 +118,8 @@ namespace IA_MLP
             Random random = new Random();
             for (int pointIndex = 0; pointIndex < ValoresError.Length; pointIndex++)
             {
-                chart1.Series["Series1"].Points.AddY(ValoresError[pointIndex]);
-                chart1.Series["Series2"].Points.AddY(ValoresErrorValidacion[pointIndex]);
+                chart1.Series["Error de Entrenamiento"].Points.AddY(ValoresError[pointIndex]);
+                chart1.Series["Error de Validacion"].Points.AddY(ValoresErrorValidacion[pointIndex]);
             }
         }
         
