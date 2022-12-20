@@ -9,6 +9,7 @@ namespace IA_MLP
     public class Perceptron_e_o_s
     {
         public double[] errores;
+        public double[] errores_validacion;
         public double ultimo_error;
         public double ultimo_error_validacion;
         private int neuronas_c_entrada;
@@ -258,6 +259,7 @@ namespace IA_MLP
             double error = 0.0;
 
             this.errores = new double[corridas_maximas];
+            this.errores_validacion = new double[corridas_maximas];
             
             //establecimos un vector con los indices para mezclarlos y poder correr los entrenamientos de manera aleatoria sobre los datos proporcionados
             int[] secuencia = new int[datos_entrenamiento.Length];
@@ -273,6 +275,7 @@ namespace IA_MLP
                 ultimo_error_validacion = Error(datos_validacion);
 
                 errores[corridas - 1] = ultimo_error;
+                errores_validacion[corridas - 1] = ultimo_error_validacion;
                 
                 if (corridas % errInterval == 0 && corridas < corridas_maximas)
                 {
@@ -501,6 +504,8 @@ namespace IA_MLP
     public class Perceptron_e_o_o_s
     {
         public double[] errores;
+        public double[] errores_validacion;
+
         public double ultimo_error;
         public double ultimo_error_validacion;
         private int neuronas_c_entrada;
@@ -807,6 +812,7 @@ namespace IA_MLP
             double error = 0.0;
 
             this.errores = new double[corridas_maximas];
+            this.errores_validacion = new double[corridas_maximas];
 
 
             //establecimos un vector con los indices para mezclarlos y poder correr los entrenamientos de manera aleatoria sobre los datos proporcionados
@@ -823,6 +829,7 @@ namespace IA_MLP
                 ultimo_error_validacion = Error(datos_validacion);
 
                 errores[corridas - 1] = ultimo_error;
+                errores_validacion[corridas - 1] = ultimo_error_validacion;
 
                 if (corridas % errInterval == 0 && corridas < corridas_maximas)
                 {

@@ -19,11 +19,14 @@ namespace IA_MLP
 
         public double[] ValoresError { get; set; }
 
+        public double[] ValoresErrorValidacion { get; set; }
+
         public void ActualizarGrafico()
         {
             System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
             System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
             System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
             System.Windows.Forms.DataVisualization.Charting.Chart chart1 = new System.Windows.Forms.DataVisualization.Charting.Chart();
             ((System.ComponentModel.ISupportInitialize)(chart1)).BeginInit();
 
@@ -79,7 +82,23 @@ namespace IA_MLP
             series1.ShadowOffset = 2;
             series1.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Double;
             series1.YValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Double;
+
+            series2.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(180)))), ((int)(((byte)(26)))), ((int)(((byte)(59)))), ((int)(((byte)(105)))));
+            series2.BorderWidth = 3;
+            series2.ChartArea = "Default";
+            series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series2.Color = System.Drawing.Color.Red;
+            series2.Legend = "Default";
+            series2.MarkerSize = 8;
+            series2.MarkerStyle = System.Windows.Forms.DataVisualization.Charting.MarkerStyle.None;
+            series2.Name = "Series2";
+            series2.ShadowColor = System.Drawing.Color.Black;
+            series2.ShadowOffset = 2;
+            series2.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Double;
+            series2.YValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Double;
+
             chart1.Series.Add(series1);
+            chart1.Series.Add(series2);
             chart1.Size = new System.Drawing.Size(600, 300);
             chart1.TabIndex = 1;
 
@@ -92,10 +111,9 @@ namespace IA_MLP
             for (int pointIndex = 0; pointIndex < ValoresError.Length; pointIndex++)
             {
                 chart1.Series["Series1"].Points.AddY(ValoresError[pointIndex]);
+                chart1.Series["Series2"].Points.AddY(ValoresErrorValidacion[pointIndex]);
             }
         }
-
-
         
     }
 }

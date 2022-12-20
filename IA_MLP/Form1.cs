@@ -22,6 +22,7 @@ namespace IA_MLP
         private string path_dataset = "";
         private double[] pesos_y_umbrales;
         private double[] errores;
+        private double[] errores_validacion;
         private string path_entrenamiento;
 
 
@@ -392,6 +393,7 @@ namespace IA_MLP
                 AgregarMostrarLineasBW1(new List<string>() { "\nComenzando el entrenamiento..." });
                 pesos_y_umbrales = nn.Entrenar(trainData, epocas, tasa_de_aprendizaje, momento, testData);
                 errores = nn.errores;
+                errores_validacion = nn.errores_validacion;
 
                 AgregarMostrarLineasBW1(new List<string>() { "Terminado!" });
                 AgregarMostrarLineasBW1(new List<string>() { "Pesos y umbrales finales de la red:" });
@@ -514,6 +516,7 @@ namespace IA_MLP
                 AgregarMostrarLineasBW2(new List<string>() { "\nComenzando el entrenamiento..." });
                 pesos_y_umbrales = nn.Entrenar(trainData, epocas, tasa_de_aprendizaje, momento, testData);
                 errores = nn.errores;
+                errores_validacion = nn.errores_validacion;
 
                 AgregarMostrarLineasBW2(new List<string>() { "Terminado!" });
                 AgregarMostrarLineasBW2(new List<string>() { "Pesos y umbrales finales de la red:" });
@@ -580,6 +583,7 @@ namespace IA_MLP
                 if (formulario.Text == "Evolución del error")
                 {
                     ((grafico_error)formulario).ValoresError = errores;
+                    ((grafico_error)formulario).ValoresErrorValidacion = errores_validacion;
                     ((grafico_error)formulario).ActualizarGrafico();
                     formulario.Activate();
                     return;
@@ -588,6 +592,7 @@ namespace IA_MLP
 
             grafico_error childForm = new grafico_error();
             childForm.ValoresError = errores;
+            childForm.ValoresErrorValidacion = errores_validacion;
             childForm.ActualizarGrafico();
             childForm.MdiParent = this.MdiParent;
             childForm.Text = "Evolución del error";
