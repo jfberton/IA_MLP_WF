@@ -319,7 +319,7 @@ namespace IA_MLP
             tb_resultados.Text = string.Empty;
             path_entrenamiento = Application.StartupPath + string.Format(@"Datasets\pesos_umbrales_100_{0}_3.txt", neuronas_capa_oculta1);
 
-            AgregarMostrarLineasBW1(new List<string>() { " - INICIANDO EL PROCESO DE ENTRENAMIENTO - " });
+            AgregarMostrarLineasBW1(new List<string>() { " - INICIANDO EL PROCESO DE ENTRENAMIENTO - " }); 
 
             AgregarMostrarLineasBW1(new List<string>() {"Cargando los datos del dataset..."});
 
@@ -390,7 +390,7 @@ namespace IA_MLP
                 AgregarMostrarLineasBW1(new List<string>() { string.Format("Momento = {0}", momento.ToString("F2")) });
 
                 AgregarMostrarLineasBW1(new List<string>() { "\nComenzando el entrenamiento..." });
-                pesos_y_umbrales = nn.Entrenar(trainData, epocas, tasa_de_aprendizaje, momento);
+                pesos_y_umbrales = nn.Entrenar(trainData, epocas, tasa_de_aprendizaje, momento, testData);
                 errores = nn.errores;
 
                 AgregarMostrarLineasBW1(new List<string>() { "Terminado!" });
@@ -399,7 +399,10 @@ namespace IA_MLP
                 
                 double error = nn.ultimo_error;
                 AgregarMostrarLineasBW1(new List<string>() { string.Format("Error final sobre datos de entrenamiento = {0}", error.ToString("#0.00%")) });
-                
+
+                double error_validacion = nn.ultimo_error_validacion;
+                AgregarMostrarLineasBW1(new List<string>() { string.Format("Error final sobre datos de validacion = {0}", error_validacion.ToString("#0.00%")) });
+
                 double trainAcc = nn.Precision(trainData);
                 AgregarMostrarLineasBW1(new List<string>() { string.Format("Precisión final sobre datos de entrenamiento = {0}", trainAcc.ToString("#0.00%")) });
 
@@ -509,7 +512,7 @@ namespace IA_MLP
                 AgregarMostrarLineasBW2(new List<string>() { string.Format("Momento = {0}", momento.ToString("F2")) });
 
                 AgregarMostrarLineasBW2(new List<string>() { "\nComenzando el entrenamiento..." });
-                pesos_y_umbrales = nn.Entrenar(trainData, epocas, tasa_de_aprendizaje, momento);
+                pesos_y_umbrales = nn.Entrenar(trainData, epocas, tasa_de_aprendizaje, momento, testData);
                 errores = nn.errores;
 
                 AgregarMostrarLineasBW2(new List<string>() { "Terminado!" });
@@ -518,6 +521,10 @@ namespace IA_MLP
 
                 double error = nn.ultimo_error;
                 AgregarMostrarLineasBW2(new List<string>() { string.Format("Error final sobre datos de entrenamiento = {0}", error.ToString("#0.00%")) });
+
+                double error_validacion = nn.ultimo_error_validacion;
+                AgregarMostrarLineasBW2(new List<string>() { string.Format("Error final sobre datos de validacion = {0}", error_validacion.ToString("#0.00%")) });
+
 
                 double trainAcc = nn.Precision(trainData);
                 AgregarMostrarLineasBW2(new List<string>() { string.Format("Precisión final sobre datos de entrenamiento = {0}", trainAcc.ToString("#0.00%")) });

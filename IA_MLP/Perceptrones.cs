@@ -10,6 +10,7 @@ namespace IA_MLP
     {
         public double[] errores;
         public double ultimo_error;
+        public double ultimo_error_validacion;
         private int neuronas_c_entrada;
         private int neuronas_c_oculta;
         public int neuronas_c_salida;
@@ -232,7 +233,7 @@ namespace IA_MLP
         }
 
 
-        public double[] Entrenar(double[][] datos_entrenamiento, int corridas_maximas, double tasa_de_aprendizaje, double momento)
+        public double[] Entrenar(double[][] datos_entrenamiento, int corridas_maximas, double tasa_de_aprendizaje, double momento, double[][] datos_validacion)
         {
             //Seteo los valores a cero
             
@@ -269,6 +270,8 @@ namespace IA_MLP
                 ++corridas;
 
                 ultimo_error = Error(datos_entrenamiento);
+                ultimo_error_validacion = Error(datos_validacion);
+
                 errores[corridas - 1] = ultimo_error;
                 
                 if (corridas % errInterval == 0 && corridas < corridas_maximas)
@@ -499,6 +502,7 @@ namespace IA_MLP
     {
         public double[] errores;
         public double ultimo_error;
+        public double ultimo_error_validacion;
         private int neuronas_c_entrada;
         private int neuronas_c_oculta_0;
         private int neuronas_c_oculta_1;
@@ -772,7 +776,7 @@ namespace IA_MLP
             return y * (1 - y); //la derivada del sigmoide se calcula en funcion de si misma
         }
 
-        public double[] Entrenar(double[][] datos_entrenamiento, int corridas_maximas, double tasa_de_aprendizaje, double momento)
+        public double[] Entrenar(double[][] datos_entrenamiento, int corridas_maximas, double tasa_de_aprendizaje, double momento, double[][] datos_validacion)
         {
             double[][] gradientes_pesos_c_oculta_1_c_salida = SetearValores(neuronas_c_oculta_1, neuronas_c_salida, 0.0);
             double[] gradientes_umbrales_salida = new double[neuronas_c_salida];
@@ -816,6 +820,8 @@ namespace IA_MLP
                 ++corridas;
 
                 ultimo_error = Error(datos_entrenamiento);
+                ultimo_error_validacion = Error(datos_validacion);
+
                 errores[corridas - 1] = ultimo_error;
 
                 if (corridas % errInterval == 0 && corridas < corridas_maximas)
